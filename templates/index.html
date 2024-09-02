@@ -1,0 +1,52 @@
+<!doctype html>
+<!--
+ Copyright 2021 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+  <meta name="google-signin-client_id" content="496812288990-o702g9h779lv2l3d2dae25rj7rcr3978.apps.googleusercontent.com" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+  <title>NeuroLens</title>
+</head>
+
+<body class="bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen flex flex-col items-center">
+
+    <!-- Title -->
+    <header class="py-10">
+      <h1 class="text-5xl font-bold text-amber-500">Neuro Lens</h1>
+    </header>
+
+    <p class="px-4 text-neutral-500">A community experiment with AI Influencers, by Scott Penberthy.</p>
+   <p>&nbsp;</p>
+
+      <!-- login button -->
+      <div class="max-w-md px-4">
+        <div id="g_id_onload"
+  	     data-client_id="496812288990-o702g9h779lv2l3d2dae25rj7rcr3978.apps.googleusercontent.com"
+	     data-callback="handleCredentialResponse">
+        </div>
+        <div width="230" class="g_id_signin" data-width="230" data-type="standard"></div>
+      </div>
+
+</body>
+</html>

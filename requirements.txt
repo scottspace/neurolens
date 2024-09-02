@@ -1,0 +1,16 @@
+Flask==3.0.0
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-cloud-storage
+oauthlib
+pyOpenSSL
+requests
+Flask-Login
+Flask-Cors
+firebase-admin
+Pillow==10.0.0
+replicate
+
+
+

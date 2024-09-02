@@ -1,0 +1,98 @@
+<!doctype html>
+<!--
+ Copyright 2021 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroLens File Upload</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
+    <!-- FilePond CSS -->
+    <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
+    <!-- FilePond Plugins -->
+    <script
+        src="https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
+    <script
+        src="https://unpkg.com/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.js"></script>
+    <link href="https://unpkg.com/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.css" rel="stylesheet">
+    <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css"
+        rel="stylesheet" />
+    <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.js"></script>
+</head>
+
+<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen">
+
+    <!-- Title -->
+    <h1 class="text-4xl font-bold text-amber-500 mb-8">NeuroLens</h1>
+
+    <!-- Instructional Paragraph -->
+    <p class="text-center text-lg mb-8">Please upload images for your personal AI Influencer</p>
+
+    <!-- FilePond File Uploader -->
+    <div class="pond">
+        <input type="file" multiple class="filepond" name="filepond" id="filepond" data-max-files="25"
+            data-max-file-size="3MB">
+    </div>
+
+    <!-- FilePond JS -->
+    <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
+
+    <!-- Initialize FilePond -->
+    <script>
+
+        // get a reference to the input element
+        const inputElement = document.querySelector('input[type="file"]');
+
+        FilePond.registerPlugin(
+            // validates the size of the file
+            FilePondPluginFileValidateSize,
+            // corrects mobile image orientation
+            FilePondPluginImageExifOrientation,
+            FilePondPluginFilePoster
+        );
+
+        // override default options
+        FilePond.setOptions({
+            dropOnPage: true,
+            dropOnElement: true,
+        });
+
+        // Create a FilePond instance
+        FilePond.create(inputElement, {
+            allowMultiple: true,
+            maxFiles: 25,
+            credits: false,
+            server: {
+                url: 'https://neurolens.scott.ai',
+                process: '/upload',
+                revert: null,
+                headers: {
+                    // Add any necessary headers here
+                }
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
