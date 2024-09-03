@@ -479,6 +479,7 @@ def train_complete(userid):
     j = request.get_json()
     feedback_id = j.get('id', None)
     print(f"Training complete for job {feedback_id}!")
+    print(j)
     u = User.get(userid)
     try:
         training_id = u.training_data.get('id', None)
