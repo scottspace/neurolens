@@ -464,19 +464,29 @@ def train():
             "learning_rate": 0.0004
         },
     )
-    User.update_training(current_user.id, training.urls)
+    User.update_training(current_user.id, training)
     # gak
-    current_user.training_data = training.urls
+    current_user.training_data = training
     current_user.model = None
-    return jsonify({'message': 'Training started', 'urls': current_user.training_data})
+    return jsonify({'message': 'Training started', 'data': current_user.training_data})
 
 @app.route('/train_complete/<userid>', methods=['POST'])
 def train_complete(userid):
-    print("Training complete!")
     j = request.get_json()
-    print(j)
-    User.update_model(userid, j) # will also nullify training data
-    return jsonify({'message': 'Training complete'})
+    feedback_id = j.get('id', None)
+    print(f"Training complete for job {feedback_id}!")
+    u = User.get(userid)
+    try:
+        training_id = u.training_data.get('id', None)
+        if training_id != feedback_id:
+            print("Older training, ignoring.")
+            return jsonify({'message': 'Training not active'})
+        else:
+            User.update_model(userid, j)
+            return jsonify({'message': 'Training complete'})
+    except:
+        print("No training found, ignoring feedback.")
+        return jsonify({'message': 'Training not found'})
 
 @app.route('/clear')
 @login_required
