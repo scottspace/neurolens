@@ -416,13 +416,19 @@ def make_model(name):
 
 # TODO only allow training if there are images, and a training isn't already in progress
 
+def valid_model(user):
+    m = user.model
+    if m is not None and m.get('status', None) == 'success':
+        return True
+    return False
+
 @app.route('/state')
 @login_required
 def state():
     updated = User.get(current_user.id)  # refresh
     if user_photo_count(updated.id) < 20:  
         ans = 'upload'
-    elif updated.model is not None:
+    elif valid_model(updated):
         ans = 'ready'
     elif updated.training_data is None:
         ans = 'submit'
