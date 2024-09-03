@@ -392,13 +392,6 @@ def create_square_thumbnail(input_image_path, output_image_path, size=228):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-# Example usage:
-input_path = 'path/to/your/image.jpg'  # Replace with your image file path
-output_path = 'path/to/output/thumbnail.jpg'  # Replace with your desired output path
-
-create_square_thumbnail(input_path, output_path)
-
-
 def make_model(name):
     try:
          model = replicate.models.create(
@@ -492,6 +485,24 @@ def delete_blob(bucket_name, blob_name):
 
     print(f"Blob {blob_name} deleted.")
     
+@app.route('/kill/<path:path>')
+def kill(path):
+    # first, delete the thumbnail this represents thumb_photo.png
+    try:
+        delete_blob(bucket_name, path)
+    except:
+        print("Thumbnail not found")
+    
+    # now delete the soruce image photo.png
+    file = os.path.basename(path)
+    parts = file.split("_")
+    source = '_'.join(parts[1:])
+    try:
+        delete_blob(bucket_name, image_path(current_user.id, source))
+    except:
+        print("Source image not found")
+    return redirect("/home")
+    
 #
 ## Photo Grid
 #
@@ -506,6 +517,17 @@ def generate_image_stream(blob):
                 break
             yield chunk
             
+
+def kill_photo(img,kill):
+    base = """
+    <div class="relative flex justify-center items-center">
+    <img class="max-w-full rounded-lg" src="{}" alt="">
+       <div class="absolute top-0 right-0 w-4 h-4">
+         <a class="text-xl font-bold" href="{}">X</a>
+    </div></div> 
+    """
+    return base.format(img,kill)
+
 @app.route("/photo/<path:path>")
 def photo(path):
     bucket = storage_client.bucket(bucket_name)
@@ -529,10 +551,12 @@ def photo_grid():
     user_id = current_user.id
     bucket = storage_client.bucket(bucket_name)
     blobs = storage_client.list_blobs(bucket_name, prefix=thumb_dir(user_id)+"/", delimiter='/')
-    images = [f"/photo/{blob.name}" for blob in blobs]
+    names = [blob.name for blob in blobs]
+    images = [[f"/photo/{name}", f"/kill/{name}"] for name in names]
     out= "<div class='grid grid-cols-2 md:grid-cols-3 gap-4'>"
-    for img in images:
-        out += f"<div><img class='h-auto max-w-full rounded-lg' src='{img}' alt=''></div>"
+    for imgkill in images:
+        img = imgkill[0]
+        out += kill_photo(imgkill[0],imgkill[1])
     out += "</div>"
     return out
 

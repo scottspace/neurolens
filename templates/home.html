@@ -44,10 +44,12 @@
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
 </head>
 
-<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen">
+<body class="bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen flex flex-col items-center">
 
     <!-- Title -->
-    <h1 class="text-4xl font-bold text-amber-500 mb-8">NeuroLens</h1>
+    <header class="py-10">
+      <h1 class="text-5xl font-bold text-amber-500">Neuro Lens</h1>
+    </header>
 
     <!-- Instructional Paragraph -->
     <p class="text-center text-lg mb-8">Please upload images to feed your personal AI Influencer</p>
@@ -142,6 +144,9 @@
                     loadGallery();
                 }
             });
+
+            // load our gallery
+            loadGallery();
         });
     </script>
 
