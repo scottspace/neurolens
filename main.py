@@ -419,12 +419,12 @@ def make_model(name):
 @app.route('/state')
 @login_required
 def state():
-    current_user = User.get(current_user.id)  # refresh
-    if user_photo_count(current_user.id) < 20:  
+    updated = User.get(current_user.id)  # refresh
+    if user_photo_count(updated.id) < 20:  
         ans = 'upload'
-    elif current_user.model is not None:
+    elif updated.model is not None:
         ans = 'ready'
-    elif current_user.training_data is None:
+    elif updated.training_data is None:
         ans = 'submit'
     else:
         ans = 'training'
