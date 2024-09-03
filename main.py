@@ -162,7 +162,7 @@ def zip_user_photos(userid):
             print("Downloading", blob.name, "to", file_path)
             blob.download_to_filename(file_path)
             zipf.write(file_path, os.path.basename(file_path))
-            os.remove(file_path)
+            silent_remove(file_path)
     print(f"Created a zip with {count} files.")
     
     # # Upload the zip file to Google Cloud Storage
@@ -170,7 +170,7 @@ def zip_user_photos(userid):
     blob = bucket.blob(zpath)
     blob.upload_from_filename(local_zpath)
     # cleanup
-    os.remove(local_zpath)
+    silent_remove(local_zpath)
 
     
 @app.route("/photo_count")
@@ -252,6 +252,12 @@ def zip_user(userzip):
     # return zip file contents
     return jsonify({'message': f"Here are the zip contents of {blob.name}: [not]"})
 
+def silent_remove(filename):
+    try:
+        os.remove(filename)
+    except OSError:
+        pass
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     print("***Upload")
@@ -281,7 +287,7 @@ def upload_file():
             resize_image_to_square(file_path, processed_path)
             create_square_thumbnail(file_path, local_thumb_path)
             print(f"Removing {file_path}")
-            os.remove(file_path)
+            silent_remove(file_path)
             file_paths.append(processed_path)
             
             # Upload the processed file to Google Cloud Storage
@@ -294,8 +300,8 @@ def upload_file():
 
         # Cleanup temporary files
         for file_path in file_paths:
-            os.remove(file_path)
-        os.remove(local_thumb_path)
+            silent_remove(file_path)
+        silent_remove(local_thumb_path)
 
         # Return the public URL of the uploaded file
         uid = current_user.id
