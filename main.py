@@ -487,10 +487,10 @@ def train_complete(userid):
             print("Older training, ignoring.")
             return jsonify({'message': 'Training not active'})
         else:
-            User.update_model(userid, j)
+            User.update_model(u.id, j)
             return jsonify({'message': 'Training complete'})
-    except:
-        print("No training found, ignoring feedback.")
+    except Exception as e:
+        print(f"Error checking training, ignoring feedback.\n{e}")
         return jsonify({'message': 'Training not found'})
 
 @app.route('/clear')
