@@ -46,9 +46,68 @@
 
 <body class="bg-gradient-to-b text-white from-gray-900 to-gray-800 min-h-screen flex flex-col items-center">
 
+    <!-- Training banner --->
+
+    <div id="informational-banner" data-dismiss-mode="hide" tabindex="-1"
+        class="hidden fixed top-0 start-0 z-50 flex flex-col justify-between w-full p-4 border-b border-gray-200 md:flex-row bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+        <div class="mb-4 md:mb-0 md:me-4">
+            <h2 class="mb-1 text-base font-semibold text-gray-900 dark:text-white">Congrats!</h2>
+            <p class="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">You have enough images to
+                train your personal AI influencer.</p>
+        </div>
+        <div class="flex items-center flex-shrink-0">
+            <a id="train-button" href="#"
+                class="inline-flex items-center justify-center px-3 py-2 me-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Train
+                My AI <svg class="w-3 h-3 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 14 10">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M1 5h12m0 0L9 1m4 4L9 9" />
+                </svg></a>
+            <button data-dismiss-target="#informational-banner" type="button"
+                class="flex-shrink-0 inline-flex justify-center w-7 h-7 items-center text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 dark:hover:bg-gray-600 dark:hover:text-white">
+                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                </svg>
+                <span class="sr-only">Close banner</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Training Underway -->
+    <div id="training-banner"
+        class="hidden flex items-center p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400"
+        role="alert">
+        <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor" viewBox="0 0 20 20">
+            <path
+                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+        </svg>
+        <span class="sr-only">Info</span>
+        <div>
+            <span class="font-medium">Training</span> Your AI is training. This will take about 30 minutes.
+        </div>
+    </div>
+
+    <!-- Training Fail -->
+    <div id="training-error"
+        class="hidden flex items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+        role="alert">
+        <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor" viewBox="0 0 20 20">
+            <path
+                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+        </svg>
+        <span class="sr-only">Info</span>
+        <div>
+            <span class="font-medium">Whoops!</span> There was an error training your AI. Please try again.
+        </div>
+    </div>
+
     <!-- Title -->
     <header class="py-10">
-      <h1 class="text-5xl font-bold text-amber-500">Neuro Lens</h1>
+        <h1 class="text-5xl font-bold text-amber-500">Neuro Lens</h1>
     </header>
 
     <!-- Instructional Paragraph -->
@@ -105,6 +164,44 @@
                 }
             })
 
+            function hide_it(id) {
+                $(id).removeClass('block').addClass('hidden');
+            }
+
+            function show_it(id) {
+                $(id).removeClass('hidden').addClass('block');
+            }
+
+            function train_bar() {
+                $.ajax({
+                    url: '/state',          // The URL for the AJAX request
+                    type: 'GET',            // Method of the request
+                    success: function (info) {
+                        // On success, replace the content of the #gallery div with the response data
+                        if (info['state'] == 'submit') {
+                            console.log("showing informational banner");
+                            show_it('#informational-banner');
+                        } else if (info['state'] = 'training') {
+                            console.log("showing training banner");
+                            hide_it('#informational-banner');
+                            show_it('#training-banner');
+                        }
+                        else {
+                            console.log("hiding both banners");
+                            hide_it('#informational-banner');
+                            hide_it('#training-banner');
+                        }
+                        console.log(info);
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle errors here
+                        console.log('Error getting state.');
+                        hide_it('#informational-banner');
+                    }
+                });
+
+            }
+
             function invalidate() {
                 $.ajax({
                     url: '/clear',          // The URL for the AJAX request
@@ -136,17 +233,53 @@
                 });
             }
 
+            function startTrain() {
+                $.ajax({
+                    url: '/train',          // The URL for the AJAX request
+                    type: 'GET',            // Method of the request
+                    success: function (data) {
+                        // On success, replace the content of the #gallery div with the response data
+                        train_bar();
+                        hide_it('#informational-banner');
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle errors here
+                        console.log("Error during training.");
+                        hide_it('#informational-banner');
+                        hide_it('#training-banner');
+                        show_it('#training-error');
+
+                        // Hide the error message after 5 seconds (5000 milliseconds)
+                        setTimeout(function () {
+                            hide_it('#training-error');
+
+                            // Call the train-bar function after the message disappears
+                            train_bar();
+                        }, 5000);
+                    }
+                });
+            }
+
             // Event listener when a file has been processed (uploaded)
             pond.on('processfile', function (error, file) {
                 if (!error) {
                     pond.removeFile(file.id); // remove the file from the pond
                     invalidate(); // clear the zip file
                     loadGallery(); // show all
+                    train_bar(); // check if we have enough images
                 }
+            });
+
+            // train button
+            $('#train-button').on('click', function () {
+                startTrain();
             });
 
             // load our gallery
             loadGallery();
+
+            // check if we have enough images
+            train_bar();
         });
     </script>
 

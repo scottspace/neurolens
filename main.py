@@ -145,13 +145,14 @@ def user_code(user):
 def zip_user_photos(userid):
     bucket = storage_client.bucket(bucket_name)
     zpath = zip_path(userid)
+    zuser = User.get(userid)
     
     # get a list of files in bucket
     pre = image_dir(userid)+"/"
     blobs = storage_client.list_blobs(bucket_name, prefix=pre, delimiter='/')
     
     # Zip the files
-    udir = user_code(current_user)
+    udir = user_code(zuser)
     os.makedirs(ZIP_FOLDER+"/"+udir, exist_ok=True)
     local_zpath = os.path.join(ZIP_FOLDER, zpath)
     count = 0
@@ -241,16 +242,19 @@ def thumb_dir(userid):
 def zip_user(userzip):
     userid = userzip.split(".")[0]
     bucket = storage_client.bucket(bucket_name)
-    
-    # see if zip file exists in bucket
     blob = bucket.blob(zip_path(userid))
     
-    # see if blob exists
+    # see if blob exists, if it doesn't zip up photos
     if not blob.exists():
         zip_user_photos(userid)
 
     # return zip file contents
-    return jsonify({'message': f"Here are the zip contents of {blob.name}: [not]"})
+    blob = bucket.blob(zip_path(userid))
+    content_type, _ = mimetypes.guess_type(blob.name)
+    response = Response(generate_zip_stream(blob), content_type=content_type)
+    response.headers['Content-Type'] = content_type
+        
+    return response, 200
 
 def silent_remove(filename):
     try:
@@ -410,6 +414,21 @@ def make_model(name):
         print(e)
     return f"{REPLICATE_USER}/{name}"
 
+# TODO only allow training if there are images, and a training isn't already in progress
+
+@app.route('/state')
+@login_required
+def state():
+    if user_photo_count(current_user.id) < 20:  
+        ans = 'upload'
+    elif current_user.model is not None:
+        ans = 'ready'
+    elif current_user.training_data is None:
+        ans = 'submit'
+    else:
+        ans = 'training'
+    return jsonify({'state': ans})
+
 @app.route('/train')
 @login_required
 def train():
@@ -420,7 +439,7 @@ def train():
     print("webhook", webhook)
     print("input_images", input_images)
     print("model", model)
-    return jsonify({'message': 'Training started', 'model': model})
+    #return jsonify({'message': 'Training started', 'model': model})
     training = replicate.trainings.create(
     # You need to create a model on Replicate that will be the destination for the trained version.                        
         destination=model,
@@ -438,12 +457,16 @@ def train():
             "learning_rate": 0.0004
         },
     )
-    User.update_training(current_user.id, training.urls())
+    User.update_training(current_user.id, training.urls)
     return jsonify({'message': 'Training started', 'urls': current_user.training_data})
 
-@app.route('/train_complete/{userid}', methods=['POST'])
+@app.route('/train_complete/<userid>', methods=['POST'])
 def train_complete(userid):
-    User.update_model(userid, request.get_json())
+    print("Training complete!")
+    j = request.get_json()
+    print(j)
+    User.update_model(userid, j)
+    User.update_training(userid, None)  # complete
     return jsonify({'message': 'Training complete'})
 
 @app.route('/clear')
@@ -523,6 +546,8 @@ def generate_image_stream(blob):
                 break
             yield chunk
             
+def generate_zip_stream(blob):
+    return generate_image_stream(blob)
 
 def kill_photo(img,kill):
     base = """
@@ -544,7 +569,7 @@ def photo(path):
         response = Response(generate_image_stream(blob), content_type=content_type)
         
         # Set cache headers for browser caching (e.g., cache for 1 week)
-       # response.headers['Cache-Control'] = 'public, max-age=604800'  # 1 week in seconds
+        response.headers['Cache-Control'] = 'public, max-age=604800'  # 1 week in seconds
         response.headers['Content-Type'] = content_type
         
         return response, 200

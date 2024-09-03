@@ -18,8 +18,8 @@ class User(UserMixin):
         self.profile_pic = profile_pic
         self.has_photos = False
         self.photo_url = ""
-        self.training_data = {}
-        self.model = ""
+        self.training_data = None  # indicates we are training
+        self.model = None
 
     @staticmethod
     def get(user_id):
@@ -48,9 +48,9 @@ class User(UserMixin):
     @staticmethod
     def update_model(user_id, model_data):
         doc_ref = db.collection("users").document(str(user_id))
-        doc_ref.update({'model': model_name})
+        doc_ref.update({'model': model_data, 'trainning_data': None})
     
     @staticmethod
     def update_training(user_id, training_data):
         doc_ref = db.collection("users").document(str(user_id))
-        doc_ref.update({'training_data': training_data})
+        doc_ref.update({'training_data': training_data, 'model': None})
