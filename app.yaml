@@ -28,4 +28,9 @@ handlers:
 
 env_variables:
   FLASK_APP: main.py
-  GOOGLE_APPLICATION_CREDENTIALS: "config/service.json"
+
+# Include sensitive environment variables
+# GOOGLE_APPLICATION_CREDENTIALS: "local path to json service account key file"
+# REPLICATE_API_TOKEN: "xxx""
+includes:
+  - env_variables.yaml

@@ -115,21 +115,9 @@ def root():
     # For the sake of example, use static information to inflate the template.
     # This will be replaced with real information in later steps.
     if current_user.is_authenticated:
-        return (
-            "<p>Hello, {}! You're logged in! Email: {}</p>"
-            "<div><p>Google Profile Picture:</p>"
-            '<img src="{}" alt="Google profile pic"></img></div>'
-            '<a class="button" href="/logout">Logout</a>'.format(
-                current_user.name, current_user.email, current_user.profile_pic
-            )
-        )
+        return redirect("/home")
     else:
-        dummy_times = [
-            datetime.datetime(2018, 1, 1, 10, 0, 0),
-            datetime.datetime(2018, 1, 2, 10, 30, 0),
-            datetime.datetime(2018, 1, 3, 11, 0, 0),
-        ]
-        return render_template("index.html", times=dummy_times)
+        return render_template("index.html")
 
 @app.route("/home")
 @login_required
@@ -152,32 +140,66 @@ def zip_user_photos(userid):
     zpath = zip_path(userid)
     
     # get a list of files in bucket
-    blobs = bucket.list_blobs(image_dir(userid))
+    blobs = storage_client.list_blobs(bucket_name, prefix=image_dir(userid), delimiter='/')
     
     # Zip the files
+    udir = user_code(current_user)
     os.makedirs(ZIP_FOLDER+"/"+udir, exist_ok=True)
     local_zpath = os.path.join(ZIP_FOLDER, zpath)
     with zipfile.ZipFile(local_zpath, 'w') as zipf:
+        count = 0
         for blob in blobs:
+            count += 1
             file_path = os.path.join(UPLOAD_FOLDER, blob.name)
+            print("Downloading", blob.name, "to", file_path)
             blob.download_to_filename(file_path)
             zipf.write(file_path, os.path.basename(file_path))
             os.remove(file_path)
-    print("Created a zip with {} files.".format(len(blobs)))
+    print(f"Created a zip with {count} files.")
     
     # # Upload the zip file to Google Cloud Storage
+    print("Storing zip file {zpath}")
     blob = bucket.blob(zpath)
     blob.upload_from_filename(local_zpath)
+    # cleanup
+    os.remove(local_zpath)
     
 @app.route("/photo_count")
 def photo_count():
     if current_user.is_authenticated:
-        bucket = storage_client.bucket(bucket_name)
-        blobs = bucket.list_blobs(image_dir(current_user.id))
-        count = sum(1 for _ in blobs)
+        count = user_photo_count(current_user.id)
         return jsonify({'photo_count': count})
     else:
-        return jsonify({'photo_count': 0})
+        return jsonify({'photo_count': 69})
+
+    
+def user_photo_count(userid):
+    pre = image_dir(userid)+"/"
+    print(f"prefix is {pre} of {bucket_name}")
+    #bucket = storage_client.bucket(bucket_name)
+    blobs = storage_client.list_blobs(bucket_name, prefix=pre, delimiter='/')
+    #blobs = bucket.list_blobs(prefix=image_dir(userid), delimiter='/')
+    #blobs = bucket.list_blobs()
+    count = 0
+    for blob in blobs:
+        count += 1
+        print("got blob",blob.name)
+    return count
+    return sum(1 for _ in blobs)
+    
+@app.route("/my_data")
+def my_data():
+    user = User.get(current_user.id)
+    return jsonify({'zip': user.photo_url, 'photo_count': user_photo_count(current_user.id)})
+
+@app.route("/me")
+def me():
+    # Get the user's profile information
+    try:
+        user_info = id_token.verify_oauth2_token(request.cookies.get('session'), requests.Request(), CLIENT_ID)
+    except:
+        user_info = None
+    return jsonify({'user': user_info, 'code': user_code(current_user)})
     
 def zip_path(userid):
     user = User.get(userid)
@@ -204,8 +226,9 @@ def thumb_dir(userid):
     udir = user_code(user)
     return os.path.join(udir, "thumbs")
 
-@app.route('/zip/<userid>')
-def zip_user(userid):
+@app.route('/zip/<userzip>')
+def zip_user(userzip):
+    userid = userzip.split(".")[0]
     bucket = storage_client.bucket(bucket_name)
     
     # see if zip file exists in bucket
@@ -334,13 +357,22 @@ def make_model(name):
         print(e)
     return f"{REPLICATE_USER}/{name}"
 
-def tune(name, user_id, character="me:-)"):
-    model = make_model(name)
+@app.route('/train')
+@login_required
+def train():
+    code = user_code(current_user)
+    model = make_model(f"flux-dev-lora-{code}")
+    webhook = f"https://neurolens.scott.ai/train_complete/{current_user.id}"
+    input_images = f"https://neurolens.scott.ai/zip/{current_user.id}.zip"
+    print("webhook", webhook)
+    print("input_images", input_images)
+    print("model", model)
+    return jsonify({'message': 'Training started', 'model': model})
     training = replicate.trainings.create(
     # You need to create a model on Replicate that will be the destination for the trained version.                        
         destination=model,
         version="ostris/flux-dev-lora-trainer:7f53f82066bcdfb1c549245a624019c26ca6e3c8034235cd4826425b61e77bec",
-        webhook="https://webhook.site/dcc6bfe6-6662-4a0c-aa46-61dd7031b5d0",
+        webhook=webhook,
         input={
             "steps": 1000,
             "lora_rank": 16,
@@ -348,12 +380,18 @@ def tune(name, user_id, character="me:-)"):
             "batch_size": 1,
             "resolution": "512,768,1024",
             "autocaption": True,
-            "input_images": image_zip_url,
-            "trigger_word": "scott:-)",
+            "input_images": input_images,
+            "trigger_word": "me:-)",
             "learning_rate": 0.0004
         },
     )
-    return training
+    User.update_training(current_user.id, training.urls())
+    return jsonify({'message': 'Training started', 'urls': current_user.training_data})
+
+@app.route('/train_complete/{userid}', methods=['POST'])
+def train_complete(userid):
+    User.update_model(userid, request.get_json())
+    return jsonify({'message': 'Training complete'})
 
 if __name__ == "__main__":
     # This is used when running locally only. When deploying to Google App

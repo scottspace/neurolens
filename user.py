@@ -12,16 +12,18 @@ db = firestore.client()
 
 class User(UserMixin):
     def __init__(self, id_, name, email, profile_pic):
-        self.id = id_
+        self.id = str(id_)
         self.name = name
         self.email = email
         self.profile_pic = profile_pic
         self.has_photos = False
         self.photo_url = ""
+        self.training_data = {}
+        self.model = ""
 
     @staticmethod
     def get(user_id):
-        doc_ref = db.collection("users").document(user_id)
+        doc_ref = db.collection("users").document(str(user_id))
         doc = doc_ref.get()
         if doc.exists:
           info = doc.to_dict()
@@ -36,15 +38,19 @@ class User(UserMixin):
     def create(id_, name, email, profile_pic):
         data={'id': id_, 'name': name, 'email': email, 'profile_pic': profile_pic, 
               'has_photos': False, 'photo_url': ""}
-        db.collection("users").document(id_).set(data)
+        db.collection("users").document(str(id_)).set(data)
         
     @staticmethod
     def update_photo_url(user_id, url):
-        doc_ref = db.collection("users").document(user_id)
+        doc_ref = db.collection("users").document(str(user_id))
         doc_ref.update({'photo_url': url})
 
     @staticmethod
-    def update_model(user_id, model_name):
-        doc_ref = db.collection("users").document(user_id)
+    def update_model(user_id, model_data):
+        doc_ref = db.collection("users").document(str(user_id))
         doc_ref.update({'model': model_name})
     
+    @staticmethod
+    def update_training(user_id, training_data):
+        doc_ref = db.collection("users").document(str(user_id))
+        doc_ref.update({'training_data': training_data})

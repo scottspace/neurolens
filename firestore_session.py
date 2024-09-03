@@ -35,7 +35,7 @@ class FirestoreSessionInterface(SessionInterface):
         doc = doc_ref.get()
         if doc.exists:
             data = doc.to_dict()
-            print("Got session", data)
+            #print("Got session", data)
             return pickle.loads(data['data'])
         else:
             print(f"Can't find session {sid}")
@@ -50,18 +50,19 @@ class FirestoreSessionInterface(SessionInterface):
     def open_session(self, app, request):
         print("...open_session...")
         sid = self.request_session_id(request)
-        print("session id", sid)
-        print(request.headers)
+        #print("session id", sid)
         if sid:
             session_data = self.get_session(sid)
             if session_data:
                 return FirestoreSession(session_data, sid=sid)
+            else:
+                return FirestoreSession(sid=sid)
         sid = self.generate_sid()
         return FirestoreSession(sid=sid)
 
     def save_session(self, app, session, response):
         print("...save_session...")
-        print("sid:", session.sid)
+        #print("sid:", session.sid)
         doc_ref = self.client.collection(self.collection_name).document(session.sid)
         doc_ref.set({
             'data': pickle.dumps(dict(session)),
