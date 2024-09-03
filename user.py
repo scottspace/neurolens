@@ -48,7 +48,7 @@ class User(UserMixin):
     @staticmethod
     def update_model(user_id, model_data):
         doc_ref = db.collection("users").document(str(user_id))
-        doc_ref.update({'model': model_data, 'trainning_data': None})
+        doc_ref.update({'model': model_data, 'training_data': None})
     
     @staticmethod
     def update_training(user_id, training_data):
