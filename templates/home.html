@@ -119,6 +119,21 @@
             data-max-file-size="3MB">
     </div>
 
+    <!-- image prompt -->
+    <form class="hidden" id="generate-form">
+        <div class="w-full mb-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+            <div class="px-4 py-2 bg-white rounded-t-lg dark:bg-gray-800">
+                <label for="comment" class="sr-only">Your prompt</label>
+                <textarea id="comment" rows="4" class="w-full px-0 text-sm text-gray-900 bg-white border-0 dark:bg-gray-800 focus:ring-0 dark:text-white dark:placeholder-gray-400" placeholder="Describe an image using me:-) as your AI's name..." required ></textarea>
+            </div>
+            <div class="flex items-center justify-between px-3 py-2 border-t dark:border-gray-600">
+                <button id="generate-button" type="submit" class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-800">
+                    Generate
+                </button>
+            </div>
+        </div>
+     </form>
+
     <div id="gallery"></div>
 
     <!-- FilePond JS -->
@@ -172,6 +187,35 @@
                 $(id).removeClass('hidden').addClass('block');
             }
 
+            function use_submit_state() {
+                console.log("showing informational banner");
+                show_it('#informational-banner');
+                hide_it('#generation-form');
+                hide_it('#training-banner');
+            }
+
+            function use_training_state() {
+                console.log("showing training banner");
+                hide_it('#informational-banner');
+                hide_it('#generation-form');
+                show_it('#training-banner');
+            }
+
+            function use_generation_state() {
+                console.log("showing generation form");
+                hide_it('#informational-banner');
+                hide_it('#training-banner');
+                show_it('#generation-form');
+                pond.destroy();
+            }
+
+            function use_unknown_state() {
+                console.log("hiding both banners");
+                hide_it('#informational-banner');
+                hide_it('#training-banner');
+                hide_it('#generation-form');
+            }
+
             function train_bar() {
                 $.ajax({
                     url: '/state',          // The URL for the AJAX request
@@ -179,17 +223,14 @@
                     success: function (info) {
                         // On success, replace the content of the #gallery div with the response data
                         if (info['state'] == 'submit') {
-                            console.log("showing informational banner");
-                            show_it('#informational-banner');
+                           use_submit_state();
                         } else if (info['state'] == 'training') {
-                            console.log("showing training banner");
-                            hide_it('#informational-banner');
-                            show_it('#training-banner');
+                            use_training_state();
+                        } else if (info['state'] == 'ready') {
+                            use_generation_state();
                         }
                         else {
-                            console.log("hiding both banners");
-                            hide_it('#informational-banner');
-                            hide_it('#training-banner');
+                            use_unknown_state();
                         }
                         console.log(info);
                     },
