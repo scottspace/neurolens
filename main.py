@@ -436,6 +436,13 @@ def state():
         ans = 'training'
     return jsonify({'state': ans})
 
+def get_train_info(training):
+    base = training.urls
+    base['id'] = training.id
+    base['destination'] = training.destination
+    base['created-at'] = training.created_at
+    return base
+
 @app.route('/train')
 @login_required
 def train():
@@ -464,11 +471,8 @@ def train():
             "learning_rate": 0.0004
         },
     )
-    User.update_training(current_user.id, training)
-    # gak
-    current_user.training_data = training
-    current_user.model = None
-    return jsonify({'message': 'Training started', 'data': current_user.training_data})
+    User.update_training(current_user.id,get_train_info(training))
+    return jsonify({'message': 'Training started', 'id': training.id})
 
 @app.route('/train_complete/<userid>', methods=['POST'])
 def train_complete(userid):
@@ -609,6 +613,36 @@ def photo_grid():
         out += kill_photo(imgkill[0],imgkill[1])
     out += "</div>"
     return out
+
+def replicate_model_name(user):
+    return f"scottspace/flux-dev-lora-{user_code(user)}"
+
+def genImage(prompt):
+    return None
+    model = replicate.models.get("ai-forever/kandinsky-2.2")
+    version = model.versions.get("ea1addaab376f4dc227f5368bbd8eff901820fd1cc14ed8cad63b29249e9d463")
+    prediction = replicate.predictions.create(
+        version=version,
+        input={"prompt":"Watercolor painting of an underwater submarine"},
+        webhook="https://example.com/your-webhook",
+        webhook_events_filter=["completed"]
+    ) 
+
+    output = replicate.run(
+    "scottspace/flux-dev-lora-03c5b0ad5b66ca449de0c36954bfdb8f:75d0360ee8a63adfa39139bca6679f0c8e0fb1c29eb1782f0ca624728b24a84f",
+    input={
+        "model": "dev",
+        "lora_scale": 1,
+        "num_outputs": 1,
+        "aspect_ratio": "1:1",
+        "output_format": "webp",
+        "guidance_scale": 3.5,
+        "output_quality": 80,
+        "prompt_strength": 0.8,
+        "extra_lora_scale": 0.8,
+        "num_inference_steps": 28
+    }
+    )
 
 if __name__ == "__main__":
     # This is used when running locally only. When deploying to Google App
