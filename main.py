@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template, redirect, session
+from flask import stream_with_context, Response
 from firestore_session import FirestoreSessionInterface
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -20,6 +21,7 @@ from flask_cors import CORS
 from google.cloud import storage
 import os
 import replicate
+import mimetypes
 
 # Internal imports
 from user import User
@@ -132,6 +134,11 @@ def logout():
     logout_user()
     return redirect("/")
 
+@login_manager.unauthorized_handler
+def unauthorized():
+    # do stuff
+    return redirect("/")
+
 def user_code(user):
     return hashlib.md5(user.email.encode()).hexdigest()
 
@@ -140,17 +147,18 @@ def zip_user_photos(userid):
     zpath = zip_path(userid)
     
     # get a list of files in bucket
-    blobs = storage_client.list_blobs(bucket_name, prefix=image_dir(userid), delimiter='/')
+    pre = image_dir(userid)+"/"
+    blobs = storage_client.list_blobs(bucket_name, prefix=pre, delimiter='/')
     
     # Zip the files
     udir = user_code(current_user)
     os.makedirs(ZIP_FOLDER+"/"+udir, exist_ok=True)
     local_zpath = os.path.join(ZIP_FOLDER, zpath)
+    count = 0
     with zipfile.ZipFile(local_zpath, 'w') as zipf:
-        count = 0
         for blob in blobs:
             count += 1
-            file_path = os.path.join(UPLOAD_FOLDER, blob.name)
+            file_path = os.path.join(UPLOAD_FOLDER, os.path.basename(blob.name))
             print("Downloading", blob.name, "to", file_path)
             blob.download_to_filename(file_path)
             zipf.write(file_path, os.path.basename(file_path))
@@ -163,8 +171,10 @@ def zip_user_photos(userid):
     blob.upload_from_filename(local_zpath)
     # cleanup
     os.remove(local_zpath)
+
     
 @app.route("/photo_count")
+@login_required
 def photo_count():
     if current_user.is_authenticated:
         count = user_photo_count(current_user.id)
@@ -193,6 +203,7 @@ def my_data():
     return jsonify({'zip': user.photo_url, 'photo_count': user_photo_count(current_user.id)})
 
 @app.route("/me")
+@login_required
 def me():
     # Get the user's profile information
     try:
@@ -239,7 +250,7 @@ def zip_user(userzip):
         zip_user_photos(userid)
 
     # return zip file contents
-    print(f"Here are the zip contents of {blob.name}: [not]")
+    return jsonify({'message': f"Here are the zip contents of {blob.name}: [not]"})
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -268,8 +279,8 @@ def upload_file():
             file.save(file_path)
             print(f"Processing {file_path} to {processed_path}")
             resize_image_to_square(file_path, processed_path)
+            create_square_thumbnail(file_path, local_thumb_path)
             print(f"Removing {file_path}")
-            create_thumbnail(processed_path, local_thumb_path)
             os.remove(file_path)
             file_paths.append(processed_path)
             
@@ -344,6 +355,49 @@ def create_thumbnail(input_image_path, output_image_path, size=(228, 228)):
 
         # Save the final thumbnail as a PNG to retain transparency
         thumb.save(output_image_path, format='PNG')
+        
+def create_square_thumbnail(input_image_path, output_image_path, size=228):
+    """
+    Create a square thumbnail of the specified size from the input image and save it to the output path.
+
+    Args:
+        input_image_path (str): Path to the input image file.
+        output_image_path (str): Path where the thumbnail will be saved.
+        size (int): The size (width and height) of the square thumbnail. Default is 228.
+    """
+    try:
+        # Open the image
+        with Image.open(input_image_path) as image:
+            width, height = image.size
+            
+            # Determine the crop box for the largest square
+            if width > height:  # Landscape
+                left = (width - height) // 2
+                crop_box = (left, 0, left + height, height)
+            elif height > width:  # Portrait
+                top = 0
+                crop_box = (0, top, width, top + width)
+            else:  # Square
+                crop_box = (0, 0, width, height)
+
+            # Crop the image to the largest square
+            image = image.crop(crop_box)
+
+            # Resize the cropped image to the desired size
+            image = image.resize((size, size), Image.LANCZOS)
+
+            # Save the thumbnail to the output path
+            image.save(output_image_path, format='JPEG')
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+# Example usage:
+input_path = 'path/to/your/image.jpg'  # Replace with your image file path
+output_path = 'path/to/output/thumbnail.jpg'  # Replace with your desired output path
+
+create_square_thumbnail(input_path, output_path)
+
 
 def make_model(name):
     try:
@@ -392,6 +446,95 @@ def train():
 def train_complete(userid):
     User.update_model(userid, request.get_json())
     return jsonify({'message': 'Training complete'})
+
+@app.route('/clear')
+@login_required
+def clear():
+    try:
+        delete_blob(bucket_name, zip_path(current_user.id))
+    except:
+        pass
+    return jsonify({'message': 'zip deleted'})
+
+@app.route('/reset')
+@login_required
+def reset():
+    # erase zip
+    clear()
+    
+    # Delete all images and thumbnails
+    blobs = storage_client.list_blobs(bucket_name, prefix=image_dir(current_user.id)+"/", delimiter='/')
+    for blob in blobs:
+        blob.delete()
+    blobs = storage_client.list_blobs(bucket_name, prefix=thumb_dir(current_user.id)+"/", delimiter='/')
+    for blob in blobs:
+        blob.delete()
+    return jsonify({'message': 'All images and thumbnails deleted'})
+
+def delete_blob(bucket_name, blob_name):
+    """Deletes a blob from the bucket."""
+    # bucket_name = "your-bucket-name"
+    # blob_name = "your-object-name"
+
+    storage_client = storage.Client()
+
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+    generation_match_precondition = None
+
+    # Optional: set a generation-match precondition to avoid potential race conditions
+    # and data corruptions. The request to delete is aborted if the object's
+    # generation number does not match your precondition.
+    blob.reload()  # Fetch blob metadata to use in generation_match_precondition.
+    generation_match_precondition = blob.generation
+
+    blob.delete(if_generation_match=generation_match_precondition)
+
+    print(f"Blob {blob_name} deleted.")
+    
+#
+## Photo Grid
+#
+
+def generate_image_stream(blob):
+    """Generator that streams the image in chunks."""
+    chunk_size = 1024 * 1024  # 1 MB per chunk
+    with blob.open("rb") as image_file:
+        while True:
+            chunk = image_file.read(chunk_size)
+            if not chunk:
+                break
+            yield chunk
+            
+@app.route("/photo/<path:path>")
+def photo(path):
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(path)
+    if blob.exists():
+        content_type, _ = mimetypes.guess_type(blob.name)
+        # Create a streaming response with the image data
+        response = Response(generate_image_stream(blob), content_type=content_type)
+        
+        # Set cache headers for browser caching (e.g., cache for 1 week)
+       # response.headers['Cache-Control'] = 'public, max-age=604800'  # 1 week in seconds
+        response.headers['Content-Type'] = content_type
+        
+        return response, 200
+    else:
+        return "No such photo", 404
+
+@app.route("/grid")
+@login_required
+def photo_grid():
+    user_id = current_user.id
+    bucket = storage_client.bucket(bucket_name)
+    blobs = storage_client.list_blobs(bucket_name, prefix=thumb_dir(user_id)+"/", delimiter='/')
+    images = [f"/photo/{blob.name}" for blob in blobs]
+    out= "<div class='grid grid-cols-2 md:grid-cols-3 gap-4'>"
+    for img in images:
+        out += f"<div><img class='h-auto max-w-full rounded-lg' src='{img}' alt=''></div>"
+    out += "</div>"
+    return out
 
 if __name__ == "__main__":
     # This is used when running locally only. When deploying to Google App

@@ -22,6 +22,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NeuroLens File Upload</title>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
     <script src="{{ url_for('static', filename='app.js') }}"></script>
     <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
@@ -37,6 +38,10 @@
         rel="stylesheet" />
     <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
     <script src="https://unpkg.com/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.js"></script>
+    <!-- jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <!-- flowbite -->
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
 </head>
 
 <body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen">
@@ -45,7 +50,7 @@
     <h1 class="text-4xl font-bold text-amber-500 mb-8">NeuroLens</h1>
 
     <!-- Instructional Paragraph -->
-    <p class="text-center text-lg mb-8">Please upload images for your personal AI Influencer</p>
+    <p class="text-center text-lg mb-8">Please upload images to feed your personal AI Influencer</p>
 
     <!-- FilePond File Uploader -->
     <div class="pond">
@@ -53,14 +58,13 @@
             data-max-file-size="3MB">
     </div>
 
+    <div id="gallery"></div>
+
     <!-- FilePond JS -->
     <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
 
     <!-- Initialize FilePond -->
     <script>
-
-        // get a reference to the input element
-        const inputElement = document.querySelector('input[type="file"]');
 
         FilePond.registerPlugin(
             // validates the size of the file
@@ -76,21 +80,69 @@
             dropOnElement: true,
         });
 
-        // Create a FilePond instance
-        FilePond.create(inputElement, {
-            allowMultiple: true,
-            maxFiles: 25,
-            credits: false,
-            server: {
-                url: 'https://neurolens.scott.ai',
-                process: '/upload',
-                revert: null,
-                headers: {
-                    // Add any necessary headers here
-                }
-            }
-        });
+    </script>
 
+    <!-- local script -->
+    <script>
+        $(document).ready(function () {
+
+            // get a reference to the input element
+            const inputElement = document.querySelector('input[type="file"]')
+
+            const pond = FilePond.create(inputElement, {
+                allowMultiple: true,
+                maxFiles: 25,
+                credits: false,
+                server: {
+                    url: 'https://neurolens.scott.ai',
+                    process: '/upload',
+                    revert: null,
+                    headers: {
+                        // Add any necessary headers here
+                    }
+                }
+            })
+
+            function invalidate() {
+                $.ajax({
+                    url: '/clear',          // The URL for the AJAX request
+                    type: 'GET',            // Method of the request
+                    success: function (info) {
+                        // On success, replace the content of the #gallery div with the response data
+                        console.log(info);
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle errors here
+                        console.log('Error clearing gallery.');
+                    }
+                });
+
+            }
+
+            function loadGallery() {
+                $.ajax({
+                    url: '/grid',          // The URL for the AJAX request
+                    type: 'GET',            // Method of the request
+                    success: function (data) {
+                        // On success, replace the content of the #gallery div with the response data
+                        $('#gallery').html(data);
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle errors here
+                        $('#gallery').html('<p>Error loading gallery.</p>');
+                    }
+                });
+            }
+
+            // Event listener when a file has been processed (uploaded)
+            pond.on('processfile', function (error, file) {
+                if (!error) {
+                    // Replace the content of the div with jQuery
+                    invalidate(); // clear the zip file
+                    loadGallery();
+                }
+            });
+        });
     </script>
 
 </body>
