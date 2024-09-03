@@ -16,10 +16,17 @@ class User(UserMixin):
         self.name = name
         self.email = email
         self.profile_pic = profile_pic
-        self.has_photos = False
         self.photo_url = ""
         self.training_data = None  # indicates we are training
         self.model = None
+        
+    def __setattr__(self, name, value):
+        # set a value and update our datbase too
+        super().__setattr__(name, value)  # Call the parent class's __setattr__ to actually set the value
+        doc_ref = db.collection("users").document(str(self.id))
+        d = doc_ref.get().to_dict()
+        if d.get(name, None) != value:
+            doc_ref.update({name: value})
 
     @staticmethod
     def get(user_id):
@@ -30,14 +37,23 @@ class User(UserMixin):
           user = User(
               id_=info['id'], name=info['name'], email=info['email'], profile_pic=info['profile_pic']
           )
+          user.model = info.get('model', None)
+          user.training_data = info.get('training_data', None)
+          user.photo_url = info.get('photo_url', None)
           return user
         else:
             return None
 
     @staticmethod
     def create(id_, name, email, profile_pic):
-        data={'id': id_, 'name': name, 'email': email, 'profile_pic': profile_pic, 
-              'has_photos': False, 'photo_url': ""}
+        data={'id': id_, 
+              'name': name, 
+              'email': email, 
+              'profile_pic': profile_pic, 
+              'has_photos': False, 
+              'photo_url': None, 
+              'model': None, 
+              'training_data': None}
         db.collection("users").document(str(id_)).set(data)
         
     @staticmethod
