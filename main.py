@@ -419,6 +419,7 @@ def make_model(name):
 @app.route('/state')
 @login_required
 def state():
+    current_user = User.get(current_user.id)  # refresh
     if user_photo_count(current_user.id) < 20:  
         ans = 'upload'
     elif current_user.model is not None:
@@ -458,6 +459,9 @@ def train():
         },
     )
     User.update_training(current_user.id, training.urls)
+    # gak
+    current_user.training_data = training.urls
+    current_user.model = None
     return jsonify({'message': 'Training started', 'urls': current_user.training_data})
 
 @app.route('/train_complete/<userid>', methods=['POST'])
@@ -465,8 +469,7 @@ def train_complete(userid):
     print("Training complete!")
     j = request.get_json()
     print(j)
-    User.update_model(userid, j)
-    User.update_training(userid, None)  # complete
+    User.update_model(userid, j) # will also nullify training data
     return jsonify({'message': 'Training complete'})
 
 @app.route('/clear')
