@@ -7,6 +7,10 @@
     width: 300px;
 }
 
+#generation-form {
+	width: 600px;
+}
+
 .filepond--drop-label {
 	color: #4c4e53;
 }

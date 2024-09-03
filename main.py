@@ -434,6 +434,7 @@ def state():
         ans = 'submit'
     else:
         ans = 'training'
+    ans = 'ready' # testing TODO
     return jsonify({'state': ans})
 
 def get_train_info(training):
