@@ -139,9 +139,9 @@
             // Event listener when a file has been processed (uploaded)
             pond.on('processfile', function (error, file) {
                 if (!error) {
-                    // Replace the content of the div with jQuery
+                    pond.removeFile(file.id); // remove the file from the pond
                     invalidate(); // clear the zip file
-                    loadGallery();
+                    loadGallery(); // show all
                 }
             });
 
