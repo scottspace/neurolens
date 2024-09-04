@@ -555,7 +555,7 @@ def kill(path):
     except:
         print("Thumbnail not found")
     
-    # now delete the soruce image photo.png
+    # now delete the source image photo.png
     file = os.path.basename(path)
     parts = file.split("_")
     source = '_'.join(parts[1:])
@@ -582,15 +582,18 @@ def generate_image_stream(blob):
 def generate_zip_stream(blob):
     return generate_image_stream(blob)
 
-def kill_photo(img,kill):
+def kill_photo(img,kill,view):
     base = """
     <div class="relative flex justify-center items-center">
-    <img class="max-w-full rounded-lg" src="{}" alt="">
+       <a href="{}" target="_blank">
+        <img class="max-w-full rounded-lg" src="{}" alt="">
+       </a>
        <div class="absolute top-0 right-0 w-4 h-4">
          <a class="text-xl font-bold" href="{}">X</a>
-    </div></div> 
+       </div>
+    </div> 
     """
-    return base.format(img,kill)
+    return base.format(view,img,kill)
 
 @app.route("/photo/<path:path>")
 def photo(path):
@@ -608,6 +611,9 @@ def photo(path):
         return response, 200
     else:
         return "No such photo", 404
+    
+def photo_from_thumb(path):
+    return path.replace("thumbs","images")
 
 @app.route("/grid")
 @login_required
@@ -616,11 +622,11 @@ def photo_grid():
     bucket = storage_client.bucket(bucket_name)
     blobs = storage_client.list_blobs(bucket_name, prefix=thumb_dir(user_id)+"/", delimiter='/')
     names = [blob.name for blob in blobs]
-    images = [[f"/photo/{name}", f"/kill/{name}"] for name in names]
+    images = [[f"/photo/{name}", f"/kill/{name}", f"/photo/{photo_from_thumb(name)}"] for name in names]
     out= "<div class='grid grid-cols-2 md:grid-cols-3 gap-4'>"
     for imgkill in images:
         img = imgkill[0]
-        out += kill_photo(imgkill[0],imgkill[1])
+        out += kill_photo(imgkill[0],imgkill[1],imgkill[2])
     out += "</div>"
     return out
 
