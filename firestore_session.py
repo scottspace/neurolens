@@ -43,6 +43,7 @@ class FirestoreSessionInterface(SessionInterface):
     
     def request_session_id(self, request):
         try:
+            print("session request headers:", request.headers)
             cookie = request.cookies.get('session') 
             print("Loooking for session with cookie", cookie)
             return cookie

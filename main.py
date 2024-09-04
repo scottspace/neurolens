@@ -121,8 +121,12 @@ def callback():
     # Get the ID token from the request body
     data = request.get_json()
     id_token_str = data.get("id_token")
+    
+    print("Got data", data)
 
     if not id_token_str:
+        print("Missing ID token")
+        
         return "Missing ID token", 400  # Handle missing ID token error
 
     try:
@@ -147,8 +151,9 @@ def callback():
         # Return success message
         return {"message": "Login successful", "user": {"email": email, "name": name}}, 200
 
-    except ValueError:
+    except ValueError as e:
         # Invalid token
+        print("Invalid id token",str(e))
         return "Invalid ID token", 400
 
 
