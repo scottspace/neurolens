@@ -43,7 +43,9 @@ class FirestoreSessionInterface(SessionInterface):
     
     def request_session_id(self, request):
         try:
-            return request.cookies.get('session') 
+            cookie = request.cookies.get('session') 
+            print("Loooking for session with cookie", cookie)
+            return cookie
         except:
             return None
 
@@ -51,12 +53,15 @@ class FirestoreSessionInterface(SessionInterface):
         print("...open_session...")
         sid = self.request_session_id(request)
         #print("session id", sid)
-        if sid:
+        if sid is not None:
             session_data = self.get_session(sid)
             if session_data:
+                print("Found session data")
                 return FirestoreSession(session_data, sid=sid)
             else:
+                print("Using that session id")
                 return FirestoreSession(sid=sid)
+        print("Generating new session id")
         sid = self.generate_sid()
         return FirestoreSession(sid=sid)
 

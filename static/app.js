@@ -35,5 +35,8 @@ function redirect (url) {
     // All other browsers can use the standard window.location.href (they don't lose HTTP_REFERER like Internet Explorer 8 & lower does)
     else { 
         window.location.href = url; 
+        setTimeout(function(){document.location.href = url;},250);
     }
 }
+
+

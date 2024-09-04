@@ -172,7 +172,7 @@ def zip_user_photos(userid):
     print(f"Created a zip with {count} files.")
     
     # # Upload the zip file to Google Cloud Storage
-    print("Storing zip file {zpath}")
+    print(f"Storing zip file {zpath}")
     blob = bucket.blob(zpath)
     blob.upload_from_filename(local_zpath)
     # cleanup
