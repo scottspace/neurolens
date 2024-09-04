@@ -30,6 +30,7 @@ class User(UserMixin):
         doc_ref = db.collection("users").document(str(self.id))
         d = doc_ref.get().to_dict()
         if d.get(name, None) != value:
+            print("Updating user with", name, value)
             doc_ref.update({name: value})
 
     @staticmethod

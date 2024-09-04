@@ -279,16 +279,19 @@ def process_image_file(uid, bucket, file_path):
     create_square_thumbnail(file_path, local_thumb_path)
     print(f"Removing {file_path}")
     silent_remove(file_path)
-            
+        
+    print("Saving image to cloud")
     # Upload the processed file to Google Cloud Storage
     blob = bucket.blob(image_path(uid, processed_file))
     blob.upload_from_filename(processed_path)
             
+    print("Saving thumbnail to cloud")
     # Upload the thumbnail to Google Cloud Storage
     blob = bucket.blob(thumb_path(uid, processed_thumb))
     blob.upload_from_filename(local_thumb_path)
     
     #cleanup
+    print("Cleaning up")
     silent_remove(processed_path)
     silent_remove(local_thumb_path)
 
@@ -621,8 +624,13 @@ def photo_from_thumb(path):
 def photo_grid():
     user_id = current_user.id
     bucket = storage_client.bucket(bucket_name)
-    blobs = storage_client.list_blobs(bucket_name, prefix=thumb_dir(user_id)+"/", delimiter='/')
-    names = [blob.name for blob in blobs]
+    blobgen = storage_client.list_blobs(bucket_name, prefix=thumb_dir(user_id)+"/", delimiter='/')
+    blobs = [_ for _ in blobgen]
+    
+    # Sort blobs by their updated time, in descending order (most recent first)
+    blobs_sorted = sorted(blobs, key=lambda blob: blob.updated, reverse=True)
+
+    names = [blob.name for blob in blobs_sorted]
     images = [[f"/photo/{name}", f"/kill/{name}", f"/photo/{photo_from_thumb(name)}"] for name in names]
     out= "<div class='grid grid-cols-2 md:grid-cols-3 gap-4'>"
     for imgkill in images:
@@ -665,6 +673,10 @@ def genImage(user, prompt):
     prediction = replicate.predictions.create(
         version=latest_replicate_model_version(user),
         input={"prompt":str(prompt),
+               "output_format": "png",
+               "width": 1024,
+               "height": 1024,
+               "num_outputs": 1,
                "image_job": user.image_job},
         webhook="https://neurolens.scott.ai/image_update/"+user.id)
     print("Started prediction", prediction)
@@ -701,6 +713,7 @@ def image_update(userid):
             copy_images_locally(userid, imgs)
         return jsonify({'success': 0})
     except Exception as e:
+        user.image_job_status = 'error'
         print("Image Hook Exception", e)
         return jsonify({'error': str(e)}) #TODO make this string json clean  
 
