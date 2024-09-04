@@ -257,7 +257,7 @@ def zip_user(userzip):
     blob = bucket.blob(zip_path(userid))
     content_type, _ = mimetypes.guess_type(blob.name)
     response = Response(generate_zip_stream(blob), content_type=content_type)
-    response.headers['Content-Type'] = content_type
+    #response.headers['Content-Type'] = content_type
         
     return response, 200
 
