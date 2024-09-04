@@ -23,15 +23,6 @@ class User(UserMixin):
         self.image_job_status = None
         self.image_job_log = None
         self.image_job_output = None
-        
-    def __setattr__(self, name, value):
-        # set a value and update our datbase too
-        super().__setattr__(name, value)  # Call the parent class's __setattr__ to actually set the value
-        doc_ref = db.collection("users").document(str(self.id))
-        d = doc_ref.get().to_dict()
-        if d.get(name, None) != value:
-            print("Updating user with", name, value)
-            doc_ref.update({name: value})
             
     def save(self):
         # save the user to the database
