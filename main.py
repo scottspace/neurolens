@@ -161,7 +161,7 @@ def callback():
     return redirect(url_for("home"))
 
 @app.route('/authx/google', methods=['POST'])
-def auth_google():
+def authx_google():
     print("***Auth/google")
     #print(request.headers)
 
