@@ -25,7 +25,7 @@ from google.cloud import storage
 import os
 import replicate
 import mimetypes
-import requests
+import requests as webrequests
 import uuid
 
 # Internal imports
@@ -737,7 +737,7 @@ def copy_images_locally(userid, urls):
         filename = unique_filename(url)
         local_path = os.path.join(UPLOAD_FOLDER, filename)
         print("Downloading", url, "to", local_path)
-        r = requests.get(url, stream=True)
+        r = webrequests.get(url, stream=True)
         with open(local_path, 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
