@@ -354,14 +354,17 @@
                 $.ajax({
                     url: '/genImage',        // The URL for the AJAX request
                     type: 'POST',            // Method of the request
-                    data: {
+                    contentType: 'application/json',
+                    data: JSON.stringify({
                         prompt: $('#prompt').val()
-                    },
+                    }),
                     success: function (data) {
                         // Turn off the generate button while we wait
                         // and monitor the outcome.
                         $('#generate-button').prop('disabled', true)
                         monitor_generation();
+                        console.log("Success: ");
+                        console.log(data);
                     },
                     error: function (xhr, status, error) {
                         // Handle errors here
