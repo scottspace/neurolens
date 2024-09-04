@@ -113,6 +113,8 @@ def auth_google():
 
 @app.route("/auth/google/callback")
 def callback():
+    
+    print("auth callback")
     # Get the authorization code from the redirect
     code = request.args.get("code")
     
@@ -155,7 +157,10 @@ def callback():
     session['pic'] = picture
     
     # You can add logic here to handle user info, e.g., saving to a database
+    print(f"Logging in {email}")
     auth_user(user_id,name,email,picture)
+    
+    print("redirecting to home")
     
     # Redirect to the home page or some other page
     return redirect(url_for("home"))
