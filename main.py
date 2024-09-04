@@ -668,6 +668,7 @@ def genImage(user, prompt):
     user.image_job_log = None
     user.image_job_status = "requested"
     user.image_job_output = None
+    user.save()
     v = latest_replicate_model_version(user)
     print("Trying model version", v.id)
     prediction = replicate.predictions.create(
@@ -711,9 +712,11 @@ def image_update(userid):
             user.image_job_output = {'images': info.get('urls',None)}
             print("Images are ready", imgs)
             copy_images_locally(userid, imgs)
+        user.save()
         return jsonify({'success': 0})
     except Exception as e:
         user.image_job_status = 'error'
+        user.save()
         print("Image Hook Exception", e)
         return jsonify({'error': str(e)}) #TODO make this string json clean  
 

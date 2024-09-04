@@ -32,7 +32,24 @@ class User(UserMixin):
         if d.get(name, None) != value:
             print("Updating user with", name, value)
             doc_ref.update({name: value})
-
+            
+    def save(self):
+        # save the user to the database
+        data={'id': self.id, 
+              'name': self.name, 
+              'email': self.email, 
+              'profile_pic': self.profile_pic, 
+              'photo_url': self.photo_url, 
+              'model': self.model, 
+              'image_job': self.image_job,
+              'image_job_status': self.image_job_status,
+              'image_job_log': self.image_job_log,
+              'image_job_output': self.image_job_output,
+              'training_data': self.training_data}
+        doc_ref = db.collection("users").document(str(self.id))
+        d = doc_ref.get().to_dict()
+        doc_ref.update(data)
+        
     @staticmethod
     def get(user_id):
         doc_ref = db.collection("users").document(str(user_id))
@@ -40,7 +57,10 @@ class User(UserMixin):
         if doc.exists:
           info = doc.to_dict()
           user = User(
-              id_=info['id'], name=info['name'], email=info['email'], profile_pic=info['profile_pic']
+              id_=info['id'], 
+              name=info['name'], 
+              email=info['email'], 
+              profile_pic=info['profile_pic']
           )
           user.model = info.get('model', None)
           user.training_data = info.get('training_data', None)
