@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template, redirect, session
-from flask import stream_with_context, Response, make_response, send_file
+from flask import stream_with_context, Response, make_response, send_file, url_for
 from firestore_session import FirestoreSessionInterface
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -55,6 +55,13 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 CORS(app)
 
+# oauth2 setup
+client = WebApplicationClient(CLIENT_ID)
+
+# Google OAuth endpoints
+GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
+
+
 # Initialize Firebase session interface
 # Replace 'your-firebase-database-url' and 'serviceAccountKey.json' with your actual values
 app.session_interface = FirestoreSessionInterface()
@@ -88,7 +95,72 @@ def auth_user(user_id, name, email, profile_pic):
     
     print("Logged in user")
 
-@app.route('/auth/google', methods=['POST'])
+@app.route('/auth/google')
+def auth_google():
+    # Get Google's authorization endpoint from the discovery document
+    google_provider_cfg = requests.get(GOOGLE_DISCOVERY_URL).json()
+    authorization_endpoint = google_provider_cfg["authorization_endpoint"]
+    
+    # Prepare the redirect URI for the callback
+    request_uri = client.prepare_request_uri(
+        authorization_endpoint,
+        redirect_uri=request.url_root + "auth/google/callback",
+        scope=["openid", "email", "profile"],
+    )
+    
+    # Redirect to Google OAuth 2.0 for login
+    return redirect(request_uri)
+
+@app.route("/auth/google/callback")
+def callback():
+    # Get the authorization code from the redirect
+    code = request.args.get("code")
+    
+    # Get Google's token endpoint
+    google_provider_cfg = requests.get(GOOGLE_DISCOVERY_URL).json()
+    token_endpoint = google_provider_cfg["token_endpoint"]
+    
+    # Prepare and send a request to get the access token and ID token
+    token_url, headers, body = client.prepare_token_request(
+        token_endpoint,
+        authorization_response=request.url,
+        redirect_uri=request.url_root + "auth/google/callback",
+        code=code
+    )
+    
+    token_response = requests.post(
+        token_url,
+        headers=headers,
+        data=body,
+        auth=(CLIENT_ID, CLIENT_SECRET),
+    )
+
+    # Parse the tokens
+    client.parse_request_body_response(token_response.text)
+
+    # Get the user's ID token (JWT) and verify it
+    id_token_str = token_response.json().get("id_token")
+    id_info = id_token.verify_oauth2_token(id_token_str, requests.Request(), CLIENT_ID)
+    
+    # Extract user information
+    user_id = id_info["sub"]
+    email = id_info["email"]
+    name = id_info["name"]
+    picture = id_info["picture"]
+
+    # Log in the user (this can involve storing user info in your database, session, etc.)
+    session['user_id'] = user_id
+    session['email'] = email
+    session['name'] = name
+    session['pic'] = picture
+    
+    # You can add logic here to handle user info, e.g., saving to a database
+    auth_user(user_id,name,email,picture)
+    
+    # Redirect to the home page or some other page
+    return redirect(url_for("home"))
+
+@app.route('/authx/google', methods=['POST'])
 def auth_google():
     print("***Auth/google")
     #print(request.headers)
