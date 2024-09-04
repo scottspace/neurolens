@@ -137,7 +137,7 @@ def home():
 @login_required
 def logout():
     logout_user()
-    return redirect("/")
+    return jsonify({'message': 'User logged out', 'url': 'https://neurolens.scott.ai/'})
 
 @login_manager.unauthorized_handler
 def unauthorized():
