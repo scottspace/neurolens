@@ -98,7 +98,7 @@ def auth_user(user_id, name, email, profile_pic):
 @app.route('/auth/google', methods=['POST'])
 def auth_google():
     # Get Google's authorization endpoint from the discovery document
-    google_provider_cfg = requests.get(GOOGLE_DISCOVERY_URL).json()
+    google_provider_cfg = webrequests.get(GOOGLE_DISCOVERY_URL).json()
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
     
     # Prepare the redirect URI for the callback
@@ -119,7 +119,7 @@ def callback():
     code = request.args.get("code")
     
     # Get Google's token endpoint
-    google_provider_cfg = requests.get(GOOGLE_DISCOVERY_URL).json()
+    google_provider_cfg = webrequests.get(GOOGLE_DISCOVERY_URL).json()
     token_endpoint = google_provider_cfg["token_endpoint"]
     
     # Prepare and send a request to get the access token and ID token
@@ -130,7 +130,7 @@ def callback():
         code=code
     )
     
-    token_response = requests.post(
+    token_response = webrequests.post(
         token_url,
         headers=headers,
         data=body,
