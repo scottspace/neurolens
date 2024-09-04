@@ -95,7 +95,7 @@ def auth_user(user_id, name, email, profile_pic):
     
     print("Logged in user")
 
-@app.route('/auth/google')
+@app.route('/auth/google', methods=['POST'])
 def auth_google():
     # Get Google's authorization endpoint from the discovery document
     google_provider_cfg = requests.get(GOOGLE_DISCOVERY_URL).json()
