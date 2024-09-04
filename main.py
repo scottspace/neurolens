@@ -508,7 +508,7 @@ def make_model(name):
 
 def valid_model(user):
     m = user.model
-    if m is not None and m.get('status', None) == 'success':
+    if m is not None and m.get('status', None) in ['success', 'succeeded']:
         return True
     return False
 
