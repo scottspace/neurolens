@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template, redirect, session
-from flask import stream_with_context, Response, make_response
+from flask import stream_with_context, Response, make_response, send_file
 from firestore_session import FirestoreSessionInterface
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -255,11 +255,13 @@ def zip_user(userzip):
 
     # return zip file contents
     blob = bucket.blob(zip_path(userid))
-    content_type, _ = mimetypes.guess_type(blob.name)
-    response = Response(generate_zip_stream(blob), content_type=content_type)
+    local_tmp = os.path.join('/tmp', os.path.basename(blob.name))
+    blob.download_to_filename(local_tmp)
+    send_file(local_tmp, as_attachment=True)
+    
+    #content_type, _ = mimetypes.guess_type(blob.name)
+    #response = Response(generate_zip_stream(blob), content_type=content_type)
     #response.headers['Content-Type'] = content_type
-        
-    return response, 200
 
 def silent_remove(filename):
     try:
