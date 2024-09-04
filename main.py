@@ -113,7 +113,47 @@ def auth_google():
     # Redirect to Google OAuth 2.0 for login
     return redirect(request_uri)
 
+#proposed by chatgpt
 @app.route("/auth/google/callback", methods=["POST"])
+def callback():
+    print("auth callback")
+
+    # Get the ID token from the request body
+    data = request.get_json()
+    id_token_str = data.get("id_token")
+
+    if not id_token_str:
+        return "Missing ID token", 400  # Handle missing ID token error
+
+    try:
+        # Verify the ID token
+        id_info = id_token.verify_oauth2_token(id_token_str, requests.Request(), CLIENT_ID)
+
+        # Extract user information
+        user_id = id_info["sub"]
+        email = id_info["email"]
+        name = id_info["name"]
+        picture = id_info["picture"]
+
+        # Log in the user (this can involve storing user info in your database, session, etc.)
+        session['user_id'] = user_id
+        session['email'] = email
+        session['name'] = name
+        session['pic'] = picture
+
+        print(f"Logging in {email}")
+        auth_user(user_id, name, email, picture)
+
+        # Return success message
+        return {"message": "Login successful", "user": {"email": email, "name": name}}, 200
+
+    except ValueError:
+        # Invalid token
+        return "Invalid ID token", 400
+
+
+
+@app.route("/authx/google/callback", methods=["POST"])
 def callback():
     
     print("auth callback")
