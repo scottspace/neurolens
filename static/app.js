@@ -1,4 +1,4 @@
-function handleCredentialResponse(response) {
+function oldhandleCredentialResponse(response) {
   // This function will be called after the user successfully signs in.
   fetch('/auth/google', {
     method: 'POST',
@@ -16,6 +16,27 @@ function handleCredentialResponse(response) {
   })
   .catch((error) => {
     console.error('Error:', error);
+  });
+}
+
+
+function handleCredentialResponse(response) {
+  // Send the ID token to your Flask backend for verification
+  fetch('/auth/google/callback', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id_token: response.credential })
+  })
+  .then(response => response.json())
+  .then(data => {
+      console.log('Success:', data);
+      // Redirect to the homepage or handle the user session
+      window.location.href = '/home';
+  })
+  .catch((error) => {
+      console.error('Error:', error);
   });
 }
 

@@ -108,6 +108,8 @@ def auth_google():
         scope=["openid", "email", "profile"],
     )
     
+    print(f"Google auth redirecting to {request_uri}")
+    
     # Redirect to Google OAuth 2.0 for login
     return redirect(request_uri)
 
@@ -163,6 +165,7 @@ def callback():
     print("redirecting to home")
     
     # Redirect to the home page or some other page
+    print(f"Redirecting to {url_for('home')}")
     return redirect(url_for("home"))
 
 @app.route('/authx/google', methods=['POST'])
