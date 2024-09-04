@@ -313,7 +313,7 @@ def upload_file():
         for file in files:
             file_path = os.path.join(UPLOAD_FOLDER, file.filename)
             file.save(file_path)
-            process_image_file(current_user.id, file_path, bucket)
+            process_image_file(current_user.id, bucket, file_path)
 
         # Return the public URL of the uploaded file
         uid = current_user.id
@@ -715,7 +715,7 @@ def copy_images_locally(userid, urls):
         with open(local_path, 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
-        process_image_file(userid, local_path, bucket)
+        process_image_file(userid, bucket, local_path)
         
 def tz_now():
    n = datetime.now(timezone.utc)
