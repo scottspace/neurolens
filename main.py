@@ -257,7 +257,7 @@ def zip_user(userzip):
     blob = bucket.blob(zip_path(userid))
     local_tmp = os.path.join('/tmp', os.path.basename(blob.name))
     blob.download_to_filename(local_tmp)
-    send_file(local_tmp, as_attachment=True)
+    return send_file(local_tmp, as_attachment=True), 200
     
     #content_type, _ = mimetypes.guess_type(blob.name)
     #response = Response(generate_zip_stream(blob), content_type=content_type)
