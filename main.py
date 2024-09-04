@@ -691,10 +691,11 @@ def genImage(user, prompt):
 @app.route('/image_status')
 @login_required
 def image_status():
-    return jsonify({'status': current_user.image_job_status, 
-                    'job': current_user.image_job,
-                    'output': current_user.image_job_output,
-                    'log': current_user.image_job_log})
+    user = User.get(current_user.id) #important to refresh!
+    return jsonify({'status': user.image_job_status, 
+                    'job': user.image_job,
+                    'output': user.image_job_output,
+                    'log': user.image_job_log})
 
 # replicate posts back here with updates on the image
 @app.route("/image_update/<userid>", methods=['POST'])
