@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template, redirect, session
-from flask import stream_with_context, Response
+from flask import stream_with_context, Response, make_response
 from firestore_session import FirestoreSessionInterface
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -446,7 +446,7 @@ def state():
     else:
         ans = 'training'
     #ans = 'ready' # testing TODO
-    return jsonify({'state': ans})
+    return nocache_json({'state': ans})
 
 def get_train_info(training):
     base = training.urls
@@ -687,15 +687,24 @@ def genImage(user, prompt):
 ## Webhook for images
 #
 
+def nocache_json(j):
+    response = make_response(jsonify(j))
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
 # this is pinged frequently by the web ui
 @app.route('/image_status')
 @login_required
 def image_status():
     user = User.get(current_user.id) #important to refresh!
-    return jsonify({'status': user.image_job_status, 
-                    'job': user.image_job,
-                    'output': user.image_job_output,
-                    'log': user.image_job_log})
+    print("status for {}".format(user.email))
+    return nocache_json({
+        'status': user.image_job_status, 
+        'job': user.image_job,
+        'output': user.image_job_output,
+        'log': user.image_job_log})
 
 # replicate posts back here with updates on the image
 @app.route("/image_update/<userid>", methods=['POST'])
