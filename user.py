@@ -57,7 +57,7 @@ class User(UserMixin):
           user.training_data = info.get('training_data', None)
           user.photo_url = info.get('photo_url', None)
           user.image_job = info.get('image_job', None)
-          user.image_job_status = info.get('image_job_state', None)
+          user.image_job_status = info.get('image_job_status', None)
           user.image_job_log = info.get('image_job_log', None)
           user.image_job_output = info.get('image_job_output', None)
           return user
