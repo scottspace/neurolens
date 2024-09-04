@@ -613,7 +613,8 @@ def photo(path):
         return "No such photo", 404
     
 def photo_from_thumb(path):
-    return path.replace("thumbs","images")
+    p1 = path.replace("thumbs","images")
+    return p1.replace("thumb_","")
 
 @app.route("/grid")
 @login_required
