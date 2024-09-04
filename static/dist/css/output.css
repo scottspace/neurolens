@@ -917,6 +917,10 @@ input[type="range"]::-ms-fill-lower {
   top: 0px;
 }
 
+.top-2 {
+  top: 0.5rem;
+}
+
 .z-40 {
   z-index: 40;
 }
@@ -956,6 +960,10 @@ input[type="range"]::-ms-fill-lower {
 
 .mt-4 {
   margin-top: 1rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
 }
 
 .block {

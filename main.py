@@ -680,6 +680,8 @@ def genImage(user, prompt):
                "num_outputs": 1,
                "image_job": user.image_job},
         webhook="https://neurolens.scott.ai/image_update/"+user.id)
+    user.image_job_status = prediction.status
+    user.save()
     print("Started prediction", prediction)
     return user.image_job 
 

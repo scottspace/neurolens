@@ -81,7 +81,7 @@
     <!-- Training banner --->
 
     <div id="informational-banner" data-dismiss-mode="hide" tabindex="-1"
-        class="hidden fixed top-0 start-0 z-50 flex flex-col justify-between w-full p-4 border-b border-gray-200 md:flex-row bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+        class="hidden fixed top-2 start-0 z-50 flex flex-col justify-between w-full p-4 border-b border-gray-200 md:flex-row bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
         <div class="mb-4 md:mb-0 md:me-4">
             <h2 class="mb-1 text-base font-semibold text-gray-900 dark:text-white">Congrats!</h2>
             <p class="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">You have enough images to
@@ -109,7 +109,7 @@
 
     <!-- Training Underway -->
     <div id="training-banner"
-        class="hidden flex items-center p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400"
+        class="hidden flex items-center m2-2 p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400"
         role="alert">
         <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
             fill="currentColor" viewBox="0 0 20 20">
@@ -124,7 +124,7 @@
 
     <!-- Training Fail -->
     <div id="training-error"
-        class="hidden flex items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+        class="hidden flex items-center mt-2 p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
         role="alert">
         <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
             fill="currentColor" viewBox="0 0 20 20">
@@ -139,7 +139,7 @@
 
     <!-- Generation Underway -->
     <div id="generation-banner"
-        class="hidden flex items-center p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400"
+        class="hidden flex items-center mt-2 p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400"
         role="alert">
         <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
             fill="currentColor" viewBox="0 0 20 20">
@@ -154,7 +154,7 @@
 
     <!-- Generation Fail -->
     <div id="generation-error"
-        class="hidden flex items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+        class="hidden flex items-center mt-2 p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
         role="alert">
         <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
             fill="currentColor" viewBox="0 0 20 20">
@@ -286,7 +286,7 @@
                     type: 'GET',            // Method of the request
                     success: function (info) {
                         // On success, replace the content of the #gallery div with the response data
-                        info['state'] = 'ready' // TODO remove
+                        //info['state'] = 'ready' // TODO remove
                         if (info['state'] == 'submit') {
                            use_submit_state();
                         } else if (info['state'] == 'training') {
@@ -405,6 +405,7 @@
                         // Hide the error message after 5 seconds (5000 milliseconds)
                         setTimeout(function () {
                             hide_it('#generation-error');
+                            $('#generate-button').prop('disabled', false)
                         }, 5000);
                     }
                 });
@@ -416,7 +417,7 @@
                     type: 'GET',            // Method of the request
                     success: function (info) {
                         // On success, replace the content of the #gallery div with the response data
-                        if (info['state'] == 'complete') {
+                        if (info['state'] == 'succeeded') {
                             // Turn on the generate button
                             $('#generate-button').prop('disabled', false)
                             hide_it('#generation-banner');
@@ -446,7 +447,6 @@
             // generate button
             $('#generate-button').on('click', function () {
                 console.log("We will generate the image now.");
-                use_unknown_state();
                 generate_image();
             });
 
