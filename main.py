@@ -648,7 +648,9 @@ def gen_image_post():
 def latest_replicate_model_version(user):
     base_model = f"scottspace/flux-dev-lora-{user_code(user)}"
     model = replicate.models.get(base_model)
-    versions = model.versions.list().sorted(key=lambda x: x.dict()['created_at']).reverse()
+    versions = model.versions.list()
+    # versions is a page object, which we sort in descending order by creation date 
+    sorted(versions,key=lambda x: x.dict()['created_at']).reverse()
     return versions[0]
     
 def genImage(user, prompt):
