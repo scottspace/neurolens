@@ -152,9 +152,8 @@ def callback():
         return "Invalid ID token", 400
 
 
-
 @app.route("/authx/google/callback", methods=["POST"])
-def callback():
+def callbackxxx():
     
     print("auth callback")
     # Get the authorization code from the redirect
