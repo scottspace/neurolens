@@ -113,7 +113,7 @@ def auth_google():
     # Redirect to Google OAuth 2.0 for login
     return redirect(request_uri)
 
-@app.route("/auth/google/callback")
+@app.route("/auth/google/callback", methods=["POST"])
 def callback():
     
     print("auth callback")
