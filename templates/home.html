@@ -86,7 +86,7 @@
         </svg>
         <span class="sr-only">Info</span>
         <div>
-            <span class="font-medium">Training</span> Your AI is training. This will take about 30 minutes.
+            <span class="font-medium">Note:</span> Your AI is training. This will take about 30 minutes.
         </div>
     </div>
 
@@ -105,6 +105,36 @@
         </div>
     </div>
 
+    <!-- Generation Underway -->
+    <div id="generation-banner"
+        class="hidden flex items-center p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400"
+        role="alert">
+        <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor" viewBox="0 0 20 20">
+            <path
+                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+        </svg>
+        <span class="sr-only">Info</span>
+        <div>
+            <span class="font-medium">Note:</span> Your Image is generating. This can take about 1-2 minutes.
+        </div>
+    </div>
+
+    <!-- Generation Fail -->
+    <div id="generation-error"
+        class="hidden flex items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+        role="alert">
+        <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor" viewBox="0 0 20 20">
+            <path
+                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+        </svg>
+        <span class="sr-only">Info</span>
+        <div>
+            <span class="font-medium">Whoops!</span> There was an error genrating your image. Please try again.
+        </div>
+    </div
+
     <!-- Title -->
     <header class="py-10">
         <h1 class="text-5xl font-bold text-amber-500">Neuro Lens</h1>
@@ -120,7 +150,7 @@
     </div>
 
     <!-- image generation prompt -->
-    <form class="hidden" id="generation-form">
+    <div class="hidden" id="generation-form">
         <div class="w-full mb-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
             <div class="px-4 py-2 bg-white rounded-t-lg dark:bg-gray-800">
                 <label for="prompt" class="sr-only">Your prompt</label>
@@ -132,7 +162,7 @@
                 </button>
             </div>
         </div>
-     </form>
+    </div>
 
     <div id="gallery"></div>
 
@@ -224,6 +254,7 @@
                     type: 'GET',            // Method of the request
                     success: function (info) {
                         // On success, replace the content of the #gallery div with the response data
+                        info['state'] = 'ready' // TODO remove
                         if (info['state'] == 'submit') {
                            use_submit_state();
                         } else if (info['state'] == 'training') {
@@ -318,10 +349,70 @@
                 startTrain();
             });
 
+            //
+            function generate_image() {
+                $.ajax({
+                    url: '/genImage',        // The URL for the AJAX request
+                    type: 'POST',            // Method of the request
+                    data: {
+                        prompt: $('#prompt').val()
+                    },
+                    success: function (data) {
+                        // Turn off the generate button while we wait
+                        // and monitor the outcome.
+                        $('#generate-button').prop('disabled', true)
+                        monitor_generation();
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle errors here
+                        console.log("Error generating image.");
+                        show_it('#generation-error');
+                        // Hide the error message after 5 seconds (5000 milliseconds)
+                        setTimeout(function () {
+                            hide_it('#generation-error');
+                        }, 5000);
+                    }
+                });
+            }
+
+            function monitor_generation() {
+                $.ajax({
+                    url: '/image-state',          // The URL for the AJAX request
+                    type: 'GET',            // Method of the request
+                    success: function (info) {
+                        // On success, replace the content of the #gallery div with the response data
+                        if (info['state'] == 'complete') {
+                            // Turn on the generate button
+                            $('#generate-button').prop('disabled', false)
+                            hide_it('#generation-banner');
+                            loadGallery();
+                            train_bar();
+                        } else {
+                            // Keep checking
+                            show_it('#generation-banner');
+                            setTimeout(monitor_generation, 5000);
+                        }
+                        console.log(info); // TODO remove
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle errors here
+                        console.log('Error getting state.');
+                        hide_it('#generation-banner');
+                        show_it('#generation-error');
+                        // Hide the error message after 5 seconds (5000 milliseconds)
+                        setTimeout(function () {
+                            hide_it('#generation-error');
+                            $('#generate-button').prop('disabled', false)
+                        }, 5000);
+                    }
+                });
+            }
+
             // generate button
             $('#generate-button').on('click', function () {
                 console.log("We will generate the image now.");
-                console.log($('#prompt').val());
+                use_unknown_state();
+                generate_image();
             });
 
             // load our gallery

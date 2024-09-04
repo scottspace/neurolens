@@ -199,7 +199,7 @@ def user_photo_count(userid):
     count = 0
     for blob in blobs:
         count += 1
-        print("got blob",blob.name)
+    print(f"User has {count} photos")
     return count
     return sum(1 for _ in blobs)
     
@@ -635,6 +635,7 @@ def gen_image_post():
     #print(request.headers)
 
     data = request.get_json()
+    print("Got json", data)
     job = genImage(current_user, data.get('prompt'))
     return jsonify({'message': 'Image generation started', 'job': job})
 
@@ -645,21 +646,35 @@ def latest_replicate_model_version(user):
     return versions[0]
     
 def genImage(user, prompt):
+    print("Resettting status")
     user.image_job = str(uuid.uuid4())
-    user.image_job_log = ""
+    user.image_job_log = None
     user.image_job_status = "requested"
+    user.image_job_output = None
+    v = latest_replicate_model_version(user)
+    print("Trying model version", v.id)
     prediction = replicate.predictions.create(
-        version=latest_replicate_model_version(current_user),
+        version=latest_replicate_model_version(user),
         input={"prompt":str(prompt),
-               "image_job": current_user.image_job},
+               "image_job": user.image_job},
         webhook="https://neurolens.scott.ai/image_update/"+user.id)
+    print("Started prediction", prediction)
     return user.image_job 
-
 
 #
 ## Webhook for images
 #
 
+# this is pinged frequently by the web ui
+@app.route('/image_status')
+@login_required
+def image_status():
+    return jsonify({'status': current_user.image_job_status, 
+                    'job': current_user.image_job,
+                    'output': current_user.image_job_output,
+                    'log': current_user.image_job_log})
+
+# replicate posts back here with updates on the image
 @app.route("/image_update/<userid>", methods=['POST'])
 def image_update(userid):
     try:
@@ -672,6 +687,7 @@ def image_update(userid):
         user.image_job_status = info.get('status',None)
         imgs = get_images(info)
         if imgs:
+            user.image_job_output = {'images': info.get('urls',None)}
             print("Images are ready", imgs)
             copy_images_locally(userid, imgs)
         return jsonify({'success': 0})

@@ -22,6 +22,7 @@ class User(UserMixin):
         self.image_job = None
         self.image_job_status = None
         self.image_job_log = None
+        self.image_job_output = None
         
     def __setattr__(self, name, value):
         # set a value and update our datbase too
@@ -46,6 +47,7 @@ class User(UserMixin):
           user.image_job = info.get('image_job', None)
           user.image_job_status = info.get('image_job_state', None)
           user.image_job_log = info.get('image_job_log', None)
+          user.image_job_output = info.get('image_job_output', None)
           return user
         else:
             return None
@@ -59,6 +61,9 @@ class User(UserMixin):
               'photo_url': None, 
               'model': None, 
               'image_job': None,
+              'image_job_status': None,
+              'image_job_log': None,
+              'image_job_output': None,
               'training_data': None}
         db.collection("users").document(str(id_)).set(data)
         
