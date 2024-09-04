@@ -4,6 +4,9 @@ from firestore_session import FirestoreSessionInterface
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from oauthlib.oauth2 import WebApplicationClient
+from datetime import datetime, timezone
+from urllib.parse import urlparse
+from tzlocal import get_localzone
 from PIL import Image, ImageOps
 from flask_login import (
     LoginManager,
@@ -22,6 +25,8 @@ from google.cloud import storage
 import os
 import replicate
 import mimetypes
+import requests
+import uuid
 
 # Internal imports
 from user import User
@@ -261,6 +266,31 @@ def silent_remove(filename):
         os.remove(filename)
     except OSError:
         pass
+    
+def process_image_file(uid, bucket, file_path):
+    # clean up an image stored locally at file_path and then
+    # upload the 1024x1024 and thumb to cloud storage
+    processed_file = change_extension_to_png(os.path.basename(file_path))
+    processed_thumb = "thumb_"+processed_file
+    processed_path = os.path.join(PROCESSED_FOLDER, processed_file)
+    local_thumb_path = os.path.join(PROCESSED_FOLDER, processed_thumb)
+    print(f"Processing {file_path} to {processed_path}")
+    resize_image_to_square(file_path, processed_path)
+    create_square_thumbnail(file_path, local_thumb_path)
+    print(f"Removing {file_path}")
+    silent_remove(file_path)
+            
+    # Upload the processed file to Google Cloud Storage
+    blob = bucket.blob(image_path(uid, processed_file))
+    blob.upload_from_filename(processed_path)
+            
+    # Upload the thumbnail to Google Cloud Storage
+    blob = bucket.blob(thumb_path(uid, processed_thumb))
+    blob.upload_from_filename(local_thumb_path)
+    
+    #cleanup
+    silent_remove(processed_path)
+    silent_remove(local_thumb_path)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -282,30 +312,8 @@ def upload_file():
         # Save the uploaded images
         for file in files:
             file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-            processed_file = change_extension_to_png(file.filename)
-            processed_thumb = "thumb_"+processed_file
-            processed_path = os.path.join(PROCESSED_FOLDER, processed_file)
-            local_thumb_path = os.path.join(PROCESSED_FOLDER, processed_thumb)
             file.save(file_path)
-            print(f"Processing {file_path} to {processed_path}")
-            resize_image_to_square(file_path, processed_path)
-            create_square_thumbnail(file_path, local_thumb_path)
-            print(f"Removing {file_path}")
-            silent_remove(file_path)
-            file_paths.append(processed_path)
-            
-            # Upload the processed file to Google Cloud Storage
-            blob = bucket.blob(image_path(uid, processed_file))
-            blob.upload_from_filename(processed_path)
-            
-            # Upload the thumbnail to Google Cloud Storage
-            blob = bucket.blob(thumb_path(uid, processed_thumb))
-            blob.upload_from_filename(local_thumb_path)
-
-        # Cleanup temporary files
-        for file_path in file_paths:
-            silent_remove(file_path)
-        silent_remove(local_thumb_path)
+            process_image_file(current_user.id, file_path, bucket)
 
         # Return the public URL of the uploaded file
         uid = current_user.id
@@ -434,7 +442,7 @@ def state():
         ans = 'submit'
     else:
         ans = 'training'
-    ans = 'ready' # testing TODO
+    #ans = 'ready' # testing TODO
     return jsonify({'state': ans})
 
 def get_train_info(training):
@@ -616,35 +624,107 @@ def photo_grid():
     out += "</div>"
     return out
 
-def replicate_model_name(user):
-    return f"scottspace/flux-dev-lora-{user_code(user)}"
+#
+## Image generation
+#
 
-def genImage(prompt):
-    return None
-    model = replicate.models.get("ai-forever/kandinsky-2.2")
-    version = model.versions.get("ea1addaab376f4dc227f5368bbd8eff901820fd1cc14ed8cad63b29249e9d463")
+@app.route('/genImage', methods=['POST'])
+@login_required
+def gen_image_post():
+    print("***Gen Image")
+    #print(request.headers)
+
+    data = request.get_json()
+    job = genImage(current_user, data.get('prompt'))
+    return jsonify({'message': 'Image generation started', 'job': job})
+
+def latest_replicate_model_version(user):
+    base_model = f"scottspace/flux-dev-lora-{user_code(user)}"
+    model = replicate.models.get(base_model)
+    versions = model.versions.list().sorted(key=lambda x: x.dict()['created_at']).reverse()
+    return versions[0]
+    
+def genImage(user, prompt):
+    user.image_job = str(uuid.uuid4())
+    user.image_job_log = ""
+    user.image_job_status = "requested"
     prediction = replicate.predictions.create(
-        version=version,
-        input={"prompt":"Watercolor painting of an underwater submarine"},
-        webhook="https://example.com/your-webhook",
-        webhook_events_filter=["completed"]
-    ) 
+        version=latest_replicate_model_version(current_user),
+        input={"prompt":str(prompt),
+               "image_job": current_user.image_job},
+        webhook="https://neurolens.scott.ai/image_update/"+user.id)
+    return user.image_job 
 
-    output = replicate.run(
-    "scottspace/flux-dev-lora-03c5b0ad5b66ca449de0c36954bfdb8f:75d0360ee8a63adfa39139bca6679f0c8e0fb1c29eb1782f0ca624728b24a84f",
-    input={
-        "model": "dev",
-        "lora_scale": 1,
-        "num_outputs": 1,
-        "aspect_ratio": "1:1",
-        "output_format": "webp",
-        "guidance_scale": 3.5,
-        "output_quality": 80,
-        "prompt_strength": 0.8,
-        "extra_lora_scale": 0.8,
-        "num_inference_steps": 28
-    }
-    )
+
+#
+## Webhook for images
+#
+
+@app.route("/image_update/<userid>", methods=['POST'])
+def image_update(userid):
+    try:
+        info = request.get_json(silent=True)
+        user = User.get(str(userid))
+        print("webhook ",info)
+        if info is None:
+            print("No json")
+            return jsonify({'error': 'no json'})
+        user.image_job_status = info.get('status',None)
+        imgs = get_images(info)
+        if imgs:
+            print("Images are ready", imgs)
+            copy_images_locally(userid, imgs)
+        return jsonify({'success': 0})
+    except Exception as e:
+        print("Image Hook Exception", e)
+        return jsonify({'error': str(e)}) #TODO make this string json clean  
+
+def copy_images_locally(userid, urls):
+    # handle errors TODO
+    bucket = storage_client.bucket(bucket_name)
+    for url in urls:
+        filename = unique_filename(url)
+        local_path = os.path.join(UPLOAD_FOLDER, filename)
+        print("Downloading", url, "to", local_path)
+        r = requests.get(url, stream=True)
+        with open(local_path, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
+        process_image_file(userid, local_path, bucket)
+        
+def tz_now():
+   n = datetime.now(timezone.utc)
+   n = n.astimezone(get_localzone())
+   return n
+
+def get_extension(url):
+    parsed_url = urlparse(url)
+    path = parsed_url.path
+    filename = os.path.basename(path)
+    _, file_extension = os.path.splitext(filename)
+    return file_extension
+
+def unique_filename(url):
+    md5 = hashlib.md5(url.encode()).hexdigest() 
+    ext = get_extension(url)
+    return "{}{}".format(md5,ext)
+
+def sd_success(info):
+    return info.get('status',None) in ['success','succeeded']
+
+def sd_processing(info):
+    return info.get('status',None) == 'processing'
+
+def get_images(info):
+    if sd_success(info):
+        print("SD success: {}".format(info))
+        all = info.get('output', None)
+        if all and all is not None and len(all) > 0:
+            if isinstance(all,str):
+                # replicate may do this
+                return [all]
+            return all 
+    return None
 
 if __name__ == "__main__":
     # This is used when running locally only. When deploying to Google App
