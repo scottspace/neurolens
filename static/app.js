@@ -19,7 +19,6 @@ function oldhandleCredentialResponse(response) {
   });
 }
 
-
 function handleCredentialResponse(response) {
   // Send the ID token to your Flask backend for verification
   fetch('/auth/google/callback', {
