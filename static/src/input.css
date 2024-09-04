@@ -7,6 +7,10 @@
     width: 300px;
 }
 
+#topbar {
+	width: 100%
+}
+
 #generation-form {
 	width: 600px;
 }
