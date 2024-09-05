@@ -35,7 +35,7 @@ class FirestoreSessionInterface(SessionInterface):
         doc = doc_ref.get()
         if doc.exists:
             data = doc.to_dict()
-            #print("Got session", data)
+            print("Got session")
             return pickle.loads(data['data'])
         else:
             print(f"Can't find session {sid}")
@@ -48,7 +48,7 @@ class FirestoreSessionInterface(SessionInterface):
             cookie = request.headers.get('session')
             if cookie is None:
                 cookie = request.args.get('s')
-            print("Loooking for session with cookie", cookie)
+            print("Loooking for session: ", cookie)
             return cookie
         except:
             return None
@@ -60,10 +60,10 @@ class FirestoreSessionInterface(SessionInterface):
         if sid is not None:
             session_data = self.get_session(sid)
             if session_data:
-                print("Found session data")
+                print("Found session data!")
                 return FirestoreSession(session_data, sid=sid)
             else:
-                print("Using that session id")
+                print("...no session data yet.")
                 return FirestoreSession(sid=sid)
         print("Generating new session id")
         sid = self.generate_sid()

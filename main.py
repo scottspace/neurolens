@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template, redirect, session
 from flask import stream_with_context, Response, make_response, send_file, url_for
-from firestore_session import FirestoreSessionInterface
+from firestore_session import FirestoreSessionInterface, FirestoreSession
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from oauthlib.oauth2 import WebApplicationClient
@@ -148,6 +148,10 @@ def callback():
         picture = id_info["picture"]
 
         # Log in the user (this can involve storing user info in your database, session, etc.)
+        # STOPPED HERE - we need to create a new session object, as the current one has the
+        # wrong session identifier.
+        sid = encrypt_session_identifier(user_id)
+        session.id = sid  # update session with new identifier
         session['user_id'] = user_id
         session['email'] = email
         session['name'] = name
@@ -158,7 +162,7 @@ def callback():
 
         # Return success message
         return jsonify({"message": "Login successful", 
-                        "sid": encrypt_session_identifier(user_id),
+                        "sid": sid,
                         "user": {"email": email, "name": name}}), 200
 
     except ValueError as e:
@@ -221,6 +225,7 @@ def home():
             return render_template("home.html", email=user.email, name=user.name)
         else:
             print("Invalid session ID")
+    print("redirecting from home to base - no session data")
     return redirect(url_for('/'))
     
 
