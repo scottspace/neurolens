@@ -210,17 +210,19 @@ def root():
 def home():
     print("***Home")
     sid = request.args.get('s')
+    print("Session ID", sid)
     if sid:
         user_id = decrypt_session_identifier(sid)
         print(f"found session id for {user_id}")
         if user_id is not None:
             session['user_id'] = user_id
-            current_user = User.get(user_id)
+            user = User.get(user_id)
             print("Session ID", user_id)
+            return render_template("home.html", email=user.email, name=user.name)
         else:
             print("Invalid session ID")
-            return redirect(url_for('/'))
-    return render_template("home.html", email=current_user.email, name=current_user.name)
+    return redirect(url_for('/'))
+    
 
 @app.route("/logout")
 @login_required
@@ -899,7 +901,7 @@ def decrypt_session_identifier(encrypted_identifier):
         decrypted_identifier = cipher.decrypt(url_decoded_encrypted_identifier.encode()).decode()
         _, user_id = decrypted_identifier.split("/")
     except:
-        print("Bad session string")
+        print("*Bad session string*")   
         user_id = None
     return user_id
 
