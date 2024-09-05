@@ -1,3 +1,15 @@
+const SESSION = 'neuro_session_id';
+
+function get_session() {
+  val = localStorage.getItem(SESSION);
+  if (val == null) val = "";
+  return String(val);
+}
+
+function save_session (sid) {
+  localStorage.setItem(SESSION, String(sid));
+}
+
 function oldhandleCredentialResponse(response) {
   // This function will be called after the user successfully signs in.
   fetch('/auth/google', {
@@ -21,6 +33,7 @@ function oldhandleCredentialResponse(response) {
 
 function handleCredentialResponse(response) {
   // Send the ID token to your Flask backend for verification
+  save_session("");
   fetch('/auth/google/callback', {
       method: 'POST',
       headers: {
@@ -32,6 +45,8 @@ function handleCredentialResponse(response) {
   .then(data => {
       console.log('Success:', data);
       // Redirect to the homepage or handle the user session
+      // store our session key for communicating with our server
+      save_session(data.get('sid',""));
       window.location.href = '/home';
   })
   .catch((error) => {

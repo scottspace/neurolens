@@ -44,7 +44,10 @@ class FirestoreSessionInterface(SessionInterface):
     def request_session_id(self, request):
         try:
             print("session request headers:", request.headers)
-            cookie = request.cookies.get('session') 
+            #cookie = request.cookies.get('session') 
+            cookie = request.headers.get('session')
+            if cookie is None:
+                cookie = request.args.get('s')
             print("Loooking for session with cookie", cookie)
             return cookie
         except:

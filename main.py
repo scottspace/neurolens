@@ -28,6 +28,10 @@ import mimetypes
 import requests as webrequests
 import uuid
 
+import base64
+from cryptography.fernet import Fernet
+import urllib.parse
+
 # Internal imports
 from user import User
 
@@ -77,6 +81,10 @@ def load_user(user_id):
     return User.get(user_id)
 
 print("Main.py 1")
+
+#
+## Auth
+#
 
 def auth_user(user_id, name, email, profile_pic):
     # Create a user in your db with the information provided
@@ -149,68 +157,14 @@ def callback():
         auth_user(user_id, name, email, picture)
 
         # Return success message
-        return {"message": "Login successful", "user": {"email": email, "name": name}}, 200
+        return jsonify({"message": "Login successful", 
+                        "sid": encrypt_session_identifier(user_id),
+                        "user": {"email": email, "name": name}}), 200
 
     except ValueError as e:
         # Invalid token
         print("Invalid id token",str(e))
-        return "Invalid ID token", 400
-
-
-@app.route("/authx/google/callback", methods=["POST"])
-def callbackxxx():
-    
-    print("auth callback")
-    # Get the authorization code from the redirect
-    code = request.args.get("code")
-    
-    # Get Google's token endpoint
-    google_provider_cfg = webrequests.get(GOOGLE_DISCOVERY_URL).json()
-    token_endpoint = google_provider_cfg["token_endpoint"]
-    
-    # Prepare and send a request to get the access token and ID token
-    token_url, headers, body = client.prepare_token_request(
-        token_endpoint,
-        authorization_response=request.url,
-        redirect_uri=request.url_root + "auth/google/callback",
-        code=code
-    )
-    
-    token_response = webrequests.post(
-        token_url,
-        headers=headers,
-        data=body,
-        auth=(CLIENT_ID, CLIENT_SECRET),
-    )
-
-    # Parse the tokens
-    client.parse_request_body_response(token_response.text)
-
-    # Get the user's ID token (JWT) and verify it
-    id_token_str = token_response.json().get("id_token")
-    id_info = id_token.verify_oauth2_token(id_token_str, requests.Request(), CLIENT_ID)
-    
-    # Extract user information
-    user_id = id_info["sub"]
-    email = id_info["email"]
-    name = id_info["name"]
-    picture = id_info["picture"]
-
-    # Log in the user (this can involve storing user info in your database, session, etc.)
-    session['user_id'] = user_id
-    session['email'] = email
-    session['name'] = name
-    session['pic'] = picture
-    
-    # You can add logic here to handle user info, e.g., saving to a database
-    print(f"Logging in {email}")
-    auth_user(user_id,name,email,picture)
-    
-    print("redirecting to home")
-    
-    # Redirect to the home page or some other page
-    print(f"Redirecting to {url_for('home')}")
-    return redirect(url_for("home"))
+        return jsonify({"error": "Invalid ID token"}), 400
 
 @app.route('/authx/google', methods=['POST'])
 def authx_google():
@@ -245,8 +199,9 @@ def authx_google():
 def root():
     # For the sake of example, use static information to inflate the template.
     # This will be replaced with real information in later steps.
-    if current_user.is_authenticated:
-        return redirect("/home")
+    sid = request.args.get('s')
+    if sid is not None:
+        return redirect(f"/home?s={sid}")
     else:
         return render_template("index.html")
 
@@ -254,7 +209,17 @@ def root():
 @login_required
 def home():
     print("***Home")
-    #print(request.headers)
+    sid = request.args.get('s')
+    if sid:
+        user_id = decrypt_session_identifier(sid)
+        print(f"found session id for {user_id}")
+        if user_id is not None:
+            session['user_id'] = user_id
+            current_user = User.get(user_id)
+            print("Session ID", user_id)
+        else:
+            print("Invalid session ID")
+            return redirect(url_for('/'))
     return render_template("home.html", email=current_user.email, name=current_user.name)
 
 @app.route("/logout")
@@ -904,6 +869,39 @@ def get_images(info):
                 return [all]
             return all 
     return None
+
+# Generate a key (you should generate and store this securely for your app)
+
+# Load the encryption key from an environment variable
+def get_encryption_key():
+    key = os.getenv("ENCRYPTION_KEY")
+    if not key:
+        raise ValueError("No encryption key found in environment variable 'ENCRYPTION_KEY'")
+    return key.encode()  # Convert the key from a string to bytes
+
+# Encrypt the session identifier
+def encrypt_session_identifier(user_id):
+    encryption_key = get_encryption_key()  # TODO use one per session soon
+    random_number = str(os.urandom(4).hex())  # 4 bytes = 8 hex digits (random number)
+    identifier = f"{random_number}/{user_id}"
+    cipher = Fernet(encryption_key)
+    encrypted_identifier = cipher.encrypt(identifier.encode())
+    url_safe_encrypted_identifier = urllib.parse.quote(encrypted_identifier)
+    return url_safe_encrypted_identifier
+
+# Decrypt the session identifier
+def decrypt_session_identifier(encrypted_identifier):
+    # URL decode the identifier
+    encryption_key = get_encryption_key() # TODO use one per session soon
+    try:
+        url_decoded_encrypted_identifier = urllib.parse.unquote(encrypted_identifier)
+        cipher = Fernet(encryption_key)
+        decrypted_identifier = cipher.decrypt(url_decoded_encrypted_identifier.encode()).decode()
+        _, user_id = decrypted_identifier.split("/")
+    except:
+        print("Bad session string")
+        user_id = None
+    return user_id
 
 if __name__ == "__main__":
     # This is used when running locally only. When deploying to Google App
