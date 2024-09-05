@@ -46,7 +46,11 @@ function handleCredentialResponse(response) {
       console.log('Success:', data);
       // Redirect to the homepage or handle the user session
       // store our session key for communicating with our server
-      save_session(data.get('sid',""));
+      sid = data['sid'];
+      if (sid === undefined) {
+        sid = "";
+      }
+      save_session(sid);
       window.location.href = '/home';
   })
   .catch((error) => {
