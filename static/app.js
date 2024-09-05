@@ -10,27 +10,6 @@ function save_session (sid) {
   localStorage.setItem(SESSION, String(sid));
 }
 
-function oldhandleCredentialResponse(response) {
-  // This function will be called after the user successfully signs in.
-  fetch('/auth/google', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ id_token: response.credential })
-  })
-  .then(response => response.json())
-  .then(data => {
-    // Handle response data (e.g., save user info or redirect)
-      console.log('Success:', data);
-      redirect("/home");
-      
-  })
-  .catch((error) => {
-    console.error('Error:', error);
-  });
-}
-
 function handleCredentialResponse(response) {
   // Send the ID token to your Flask backend for verification
   save_session("");
@@ -51,7 +30,7 @@ function handleCredentialResponse(response) {
         sid = "";
       }
       save_session(sid);
-      window.location.href = '/home';
+      redirect("/home?s="+sid)
   })
   .catch((error) => {
       console.error('Error:', error);
