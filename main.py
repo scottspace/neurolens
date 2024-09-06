@@ -32,6 +32,11 @@ import base64
 from cryptography.fernet import Fernet
 import urllib.parse
 
+import firebase_admin
+from firebase_admin import firestore, get_app
+
+import time
+
 # Internal imports
 from user import User
 
@@ -65,6 +70,8 @@ client = WebApplicationClient(CLIENT_ID)
 # Google OAuth endpoints
 GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
 
+#firestore setup
+db = firestore.client()
 
 # Initialize Firebase session interface
 # Replace 'your-firebase-database-url' and 'serviceAccountKey.json' with your actual values
@@ -134,7 +141,7 @@ def callback():
 
     if not id_token_str:
         print("Missing ID token")
-        return jsonify({}"error": "Missing ID token"}), 400  # Handle missing ID token error
+        return jsonify({"error": "Missing ID token"}), 400  # Handle missing ID token error
 
     try:
         # Verify the ID token
@@ -393,17 +400,20 @@ def process_image_file(uid, bucket, file_path):
     blob = bucket.blob(image_path(uid, processed_file))
     blob.upload_from_filename(processed_path)
     blob.make_public()
+    image_url = blob.public_url
             
     print("Saving thumbnail to cloud")
     # Upload the thumbnail to Google Cloud Storage
     blob = bucket.blob(thumb_path(uid, processed_thumb))
     blob.upload_from_filename(local_thumb_path)
     blob.make_public()
+    thumb_url = blob.public_url
     
     #cleanup
     print("Cleaning up")
     silent_remove(processed_path)
     silent_remove(local_thumb_path)
+    return {'image_url': image_url, 'thumb_url': thumb_url}
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -781,6 +791,38 @@ def latest_replicate_model_version(user):
     # versions is a page object, which we sort in descending order by creation date 
     sorted(versions,key=lambda x: x.dict()['created_at']).reverse()
     return versions[0]
+
+# TODO images need to be a class
+
+def create_image(user, prompt):
+    ## create a structure in firestore to store image data
+    user_id = user.id
+    image_id = user.image_job
+    doc_ref = db.collection('images').document(image_id)
+    doc = doc_ref.get()
+    if doc.exists:
+       info = doc.to_dict()
+    else:
+       info = {'user_id': user_id, 
+               'image_id': image_id}
+    info['created'] = time.time()
+    info['prompt'] = prompt
+    info['thumb_url'] = None
+    info['image_url'] = None
+    doc_ref.set(info)  
+    
+def update_image(user_id, image_id, url_dict): 
+    doc_ref = db.collection('images').document(image_id)
+    doc = doc_ref.get()
+    if doc.exists:
+       info = doc.to_dict()
+    else:
+       info = {'user_id': user_id, 
+               'image_id': image_id}
+    info['thumb_url'] = url_dict['thumb_url']
+    info['image_url'] = url_dict['image_url']
+    info['generated'] = time.time()
+    doc_ref.set(info)  
     
 def genImage(user, prompt):
     print("Resettting status")
@@ -789,8 +831,10 @@ def genImage(user, prompt):
     user.image_job_status = "requested"
     user.image_job_output = None
     user.save()
+    create_image(user, prompt)
     v = latest_replicate_model_version(user)
     print("Trying model version", v.id)
+    webhook = f"https://neurolens.scott.ai/image_update/{user.id}/{user.image_job}"
     prediction = replicate.predictions.create(
         version=latest_replicate_model_version(user),
         input={"prompt":str(prompt),
@@ -799,7 +843,7 @@ def genImage(user, prompt):
                "height": 1024,
                "num_outputs": 1,
                "image_job": user.image_job},
-        webhook="https://neurolens.scott.ai/image_update/"+user.id)
+        webhook=webhook)
     user.image_job_status = prediction.status
     user.save()
     print("Started prediction", prediction)
@@ -829,8 +873,8 @@ def image_status():
         'log': user.image_job_log})
 
 # replicate posts back here with updates on the image
-@app.route("/image_update/<userid>", methods=['POST'])
-def image_update(userid):
+@app.route("/image_update/<userid>/<job>", methods=['POST'])
+def image_update(userid, job):
     try:
         info = request.get_json(silent=True)
         user = User.get(str(userid))
@@ -838,12 +882,13 @@ def image_update(userid):
         if info is None:
             print("No json")
             return jsonify({'error': 'no json'})
+        # TODO deal with multiple image jobs, multiple images
         user.image_job_status = info.get('status',None)
         imgs = get_images(info)
         if imgs:
             user.image_job_output = {'images': info.get('urls',None)}
             print("Images are ready", imgs)
-            copy_images_locally(userid, imgs)
+            copy_images_locally(user, job, imgs)
         user.save()
         return jsonify({'success': 0})
     except Exception as e:
@@ -852,8 +897,9 @@ def image_update(userid):
         print("Image Hook Exception", e)
         return jsonify({'error': str(e)}) #TODO make this string json clean  
 
-def copy_images_locally(userid, urls):
+def copy_images_locally(user, image_job, urls):
     # handle errors TODO
+    userid = user.id
     bucket = storage_client.bucket(bucket_name)
     for url in urls:
         filename = unique_filename(url)
@@ -863,7 +909,8 @@ def copy_images_locally(userid, urls):
         with open(local_path, 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
-        process_image_file(userid, bucket, local_path)
+        # TODO store prompt in the png image :-)
+        update_image(userid, image_job, process_image_file(userid, bucket, local_path))
         
 def tz_now():
    n = datetime.now(timezone.utc)
