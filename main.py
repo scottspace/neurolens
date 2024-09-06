@@ -739,14 +739,15 @@ def photo_from_thumb(path):
     p1 = path.replace("thumbs","images")
     return p1.replace("thumb_","")
 
+# TODO we need a clean image abstraction  / class
 def image_urls(userid, thumb_blob_name):
     filename = os.path.basename(thumb_blob_name)
     photo = photo_from_thumb(filename)
-    tpath = thumb_path(userid,photo)
+    tpath = thumb_path(userid,filename)
     base = "https://storage.googleapis.com/neuro-lens-bucket"
-    return [f"{base}/{tpath}",
+    return [f"{base}/{image_path(userid,photo)}",
             f"/kill/{tpath}", 
-            f"{base}/{image_path(userid,photo)}"]
+            f"{base}/{tpath}"]
 
 @app.route("/grid")
 @login_required
