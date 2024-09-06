@@ -21,6 +21,7 @@ class FirestoreSession(dict, SessionMixin):
         super().__init__(initial or {})
         self.sid = sid
         self.modified = False
+        print("created new session")
 
 class FirestoreSessionInterface(SessionInterface):
     def __init__(self, client=None, collection_name='sessions'):
@@ -40,11 +41,11 @@ class FirestoreSessionInterface(SessionInterface):
         if sid is None:
             print("No session id")
             return None
-        return {'sid': sid}  # empty session, just with an identifier
+        return {}  # empty session data
 
     def request_session_id(self, request):
         try:
-            print("session request headers:", request.headers)
+            #print("session request headers:", request.headers)
             #cookie = request.cookies.get('session') 
             cookie = request.headers.get('session')
             if cookie is None:
@@ -62,6 +63,7 @@ class FirestoreSessionInterface(SessionInterface):
             session_data = self.get_session(sid)
             if session_data:
                 print("Found session data!")
+                print(dict(session_data))
                 return FirestoreSession(session_data, sid=sid)
             else:
                 print("...no session data yet.")
@@ -72,6 +74,8 @@ class FirestoreSessionInterface(SessionInterface):
 
     def save_session(self, app, session, response):
         print("...save_session...")
+        print("...sid: ", session.sid)
+        print(dict(session))
         #print("sid:", session.sid)]
         if session.sid is None:
             print("... ignored save, no session id")

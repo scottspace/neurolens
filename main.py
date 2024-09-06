@@ -150,8 +150,8 @@ def callback():
         # Log in the user (this can involve storing user info in your database, session, etc.)
         # STOPPED HERE - we need to create a new session object, as the current one has the
         # wrong session identifier.
-        sid = encrypt_session_identifier(user_id)
-        session.sid = sid  # update session with new identifier so that it persists
+        sid = encrypt_session_identifier(user_id) # in url quoted version for the client
+        session.sid = urllib.parse.unquote(sid)  # use unquoted version for storing
         session['user_id'] = user_id
         session['email'] = email
         session['name'] = name
@@ -203,6 +203,8 @@ def authx_google():
 def root():
     # For the sake of example, use static information to inflate the template.
     # This will be replaced with real information in later steps.
+    print("***Root")
+    print(request.headers)
     sid = request.args.get('s')
     if sid is not None:
         return redirect(f"/home?s={sid}")
@@ -225,8 +227,9 @@ def home():
             return render_template("home.html", email=user.email, name=user.name)
         else:
             print("Invalid session ID")
+            return redirect(url_for('/'))
     print("redirecting from home to base - no session data")
-    return redirect(url_for('/'))
+    return redirect(url_for('/foo'))
     
 
 @app.route("/logout")
@@ -238,6 +241,7 @@ def logout():
 @login_manager.unauthorized_handler
 def unauthorized():
     # do stuff
+    print("Unauthorized... redirecting!")
     return redirect("/")
 
 def user_code(user):
