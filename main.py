@@ -134,8 +134,7 @@ def callback():
 
     if not id_token_str:
         print("Missing ID token")
-        
-        return "Missing ID token", 400  # Handle missing ID token error
+        return jsonify({}"error": "Missing ID token"}), 400  # Handle missing ID token error
 
     try:
         # Verify the ID token
