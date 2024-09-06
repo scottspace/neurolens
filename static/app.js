@@ -46,7 +46,7 @@ function login(data) {
         // Redirect to the homepage or handle the user session
         // store our session key for communicating with our server
         console.log("logging in...");
-        print(data);
+        console.log(data);
         save_session(data);
         redirect("/home?s=" + data['sid'])
       }
