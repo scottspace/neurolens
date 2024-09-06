@@ -508,6 +508,7 @@ def create_square_thumbnail(input_image_path, output_image_path, size=228):
     try:
         # Open the image
         with Image.open(input_image_path) as image:
+            image = image.convert("RGBA")
             width, height = image.size
             
             # Determine the crop box for the largest square
@@ -527,7 +528,7 @@ def create_square_thumbnail(input_image_path, output_image_path, size=228):
             image = image.resize((size, size), Image.LANCZOS)
 
             # Save the thumbnail to the output path
-            image.save(output_image_path, format='JPEG')
+            image.save(output_image_path, format='PNG')
 
     except Exception as e:
         print(f"An error occurred: {e}")
