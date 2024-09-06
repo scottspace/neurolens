@@ -1,17 +1,25 @@
-const NSESSION = 'neuro_session_info';
+const SESSION = 'neuro_session_info';
 
 function get_session() {
-  val = localStorage.getItem(NSESSION);
+  val = localStorage.getItem(SESSION);
   if (val == null) val = "{}";
   return JSON.parse(val);
 }
 
+function get_session_id() {
+  info = get_session();
+  if (info.hasOwnProperty('sid') {
+    return info['sid'];
+  }
+  return null;
+}
+
 function save_session(info) {
-  localStorage.setItem(NSESSION, JSON.stringify(info));
+  localStorage.setItem(SESSION, JSON.stringify(info));
 }
 
 function clear_session() {
-  localStorage.removeItem(NSESSION);
+  localStorage.removeItem(SESSION);
 }
 
 function login(data) {
@@ -38,6 +46,7 @@ function login(data) {
         // Redirect to the homepage or handle the user session
         // store our session key for communicating with our server
         console.log("logging in...");
+        print(data);
         save_session(data);
         redirect("/home?s=" + data['sid'])
       }

@@ -284,7 +284,7 @@
                 $.ajax({
                     url: '/state',          // The URL for the AJAX request
                     type: 'GET',            // Method of the request
-                    headers: {'session': get_session()},
+                    headers: {'session': get_session_id()},
                     success: function (info) {
                         // On success, replace the content of the #gallery div with the response data
                         //info['state'] = 'ready' // TODO remove
@@ -313,7 +313,7 @@
                 $.ajax({
                     url: '/clear',          // The URL for the AJAX request
                     type: 'GET',            // Method of the request
-                    headers: {'session': get_session()},
+                    headers: {'session': get_session_id()},
                     success: function (info) {
                         // On success, replace the content of the #gallery div with the response data
                         console.log(info);
@@ -346,7 +346,7 @@
                 $.ajax({
                     url: '/train',          // The URL for the AJAX request
                     type: 'GET',            // Method of the request
-                    headers: {'session': get_session()},
+                    headers: {'session': get_session_id()},
                     success: function (data) {
                         // On success, replace the content of the #gallery div with the response data
                         train_bar();
@@ -391,7 +391,7 @@
                     url: '/genImage',        // The URL for the AJAX request
                     type: 'POST',            // Method of the request
                     contentType: 'application/json',
-                    headers: {'session': get_session()},
+                    headers: {'session': get_session_id()},
                     data: JSON.stringify({
                         prompt: $('#prompt').val()
                     }),
@@ -420,7 +420,7 @@
                 $.ajax({
                     url: '/image_status',          // The URL for the AJAX request
                     type: 'GET',            // Method of the request
-                    headers: {'session': get_session()},
+                    headers: {'session': get_session_id()},
                     success: function (info) {
                         // On success, replace the content of the #gallery div with the response data
                         if (info['state'] == 'succeeded') {
@@ -461,7 +461,7 @@
                 $.ajax({
                     url: '/logout',          // The URL for the AJAX request
                     type: 'GET',            // Method of the request
-                    headers: {'session': get_session()},
+                    headers: {'session': get_session_id()},
                     success: function (info) {
                         // On success, replace the content of the #gallery div with the response data
                         console.log(info);
