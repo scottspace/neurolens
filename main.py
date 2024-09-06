@@ -740,11 +740,11 @@ def photo_from_thumb(path):
 
 def image_urls(userid, thumb_blob_name):
     photo = photo_from_thumb(thumb_blob_name)
-    tpath = thumb_path(photo)
+    tpath = thumb_path(userid,photo)
     base = "https://storage.googleapis.com/neuro-lens-bucket/"
     return [f"{base}/{tpath}",
             f"/kill/{tpath}", 
-            f"{base}/{image_path(photo)}"]
+            f"{base}/{image_path(userid,photo)}"]
 
 @app.route("/grid")
 @login_required
@@ -760,7 +760,7 @@ def photo_grid():
     blobs_sorted = sorted(blobs, key=lambda blob: blob.updated, reverse=True)
 
     names = [blob.name for blob in blobs_sorted]
-    images = [image_urls(name) for name in names]
+    images = [image_urls(user_id,name) for name in names]
     out= "<div class='grid grid-cols-2 md:grid-cols-3 gap-4'>"
     for imgkill in images:
         img = imgkill[0]
