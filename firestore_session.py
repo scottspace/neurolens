@@ -37,10 +37,11 @@ class FirestoreSessionInterface(SessionInterface):
             data = doc.to_dict()
             print("Got session")
             return pickle.loads(data['data'])
-        else:
-            print(f"Can't find session {sid}")
-        return None
-    
+        if sid is None:
+            print("No session id")
+            return None
+        return {'sid': sid}  # empty session, just with an identifier
+
     def request_session_id(self, request):
         try:
             print("session request headers:", request.headers)
