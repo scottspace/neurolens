@@ -3,7 +3,8 @@ from flask.sessions import SessionInterface, SessionMixin
 from datetime import datetime, timedelta, timezone
 import pickle
 import uuid
-import urllib
+from urllib.parse import urlparse
+import urllib.parse
 import firebase_admin
 
 from firebase_admin import firestore, get_app
@@ -50,16 +51,20 @@ class FirestoreSessionInterface(SessionInterface):
             #cookie = request.cookies.get('session') 
             cookie = urllib.parse.unquote(request.headers.get('session'))
             if cookie is None:
+                print("Looking for session in args")
                 cookie = request.args.get('s')  # auto unquoted
-            print("Loooking for session: ", cookie)
+            else:
+                print("found in headers!")
+            print(f"Looking for session: '{cookie}'")
             return cookie
-        except:
+        except Exception as e:
+            print("Error getting session id:", e)
             return None
 
     def open_session(self, app, request):
         print("...open_session...")
         sid = self.request_session_id(request)
-        #print("session id", sid)
+        print(f"session id '{sid}'")
         if sid is not None:
             session_data = self.get_session(sid)
             if session_data:
