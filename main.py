@@ -384,6 +384,7 @@ def silent_remove(filename):
 def process_image_file(uid, bucket, file_path):
     # clean up an image stored locally at file_path and then
     # upload the 1024x1024 and thumb to cloud storage
+    image_id = str(uuid.uuid4())
     processed_file = change_extension_to_png(os.path.basename(file_path))
     processed_thumb = "thumb_"+processed_file
     processed_path = os.path.join(PROCESSED_FOLDER, processed_file)
@@ -407,6 +408,9 @@ def process_image_file(uid, bucket, file_path):
     blob.upload_from_filename(local_thumb_path)
     blob.make_public()
     thumb_url = blob.public_url
+    
+    # store metadata in /images of firestore
+    update_image(uid, image_id, {'image_url': image_url, 'thumb_url': thumb_url})
     
     #cleanup
     print("Cleaning up")
@@ -678,6 +682,7 @@ def kill(path):
     except:
         print("Thumbnail not found")
     
+    # TODO delete the image metadata from firestore
     # now delete the source image photo.png
     file = os.path.basename(path)
     parts = file.split("_")
@@ -748,6 +753,9 @@ def image_urls(userid, thumb_blob_name):
     return [f"{base}/{image_path(userid,photo)}",
             f"/kill/{tpath}", 
             f"{base}/{tpath}"]
+
+# TODO have /grid pull from metadata, vs directory, then provide the image_id so that
+# we can delete the image appropriately
 
 @app.route("/grid")
 @login_required
@@ -823,7 +831,7 @@ def update_image(user_id, image_id, url_dict):
                'image_id': image_id}
     info['thumb_url'] = url_dict['thumb_url']
     info['image_url'] = url_dict['image_url']
-    info['generated'] = time.time()
+    info['created'] = time.time()
     doc_ref.set(info)  
     
 def genImage(user, prompt):
