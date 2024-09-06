@@ -8,7 +8,7 @@ function get_session() {
 
 function get_session_id() {
   info = get_session();
-  if (info.hasOwnProperty('sid') {
+  if (info.hasOwnProperty('sid')) {
     return info['sid'];
   }
   return null;
