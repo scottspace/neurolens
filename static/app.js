@@ -1,17 +1,17 @@
-const SESSION = 'neuro_session_info';
+const NSESSION = 'neuro_session_info';
 
 function get_session() {
-  val = localStorage.getItem(SESSION);
-  if (val == null) val = {};
-  return val;
+  val = localStorage.getItem(NSESSION);
+  if (val == null) val = "{}";
+  return JSON.parse(val);
 }
 
 function save_session(info) {
-  localStorage.setItem(SESSION, info);
+  localStorage.setItem(NSESSION, JSON.stringify(info));
 }
 
 function clear_session() {
-  localStorage.removeItem(SESSION);
+  localStorage.removeItem(NSESSION);
 }
 
 function login(data) {
