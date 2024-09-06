@@ -230,7 +230,6 @@ def home():
         if user_id is not None:
             session['user_id'] = user_id
             user = User.get(user_id)
-            print("Session ID", user_id)
             return render_template("home.html", email=user.email, name=user.name)
         else:
             print("Invalid session ID")

@@ -6,7 +6,6 @@ import uuid
 from urllib.parse import urlparse
 import urllib.parse
 import firebase_admin
-
 from firebase_admin import firestore, get_app
 
 # Application Default credentials are automatically created.
@@ -53,11 +52,11 @@ class FirestoreSessionInterface(SessionInterface):
             if cookie is not None:
                 cookie = urllib.parse.unquote(cookie)
             if cookie is None:
-                #print("Looking for session in args")
+                print("Looking for session in args")
                 cookie = request.args.get('s')  # auto unquoted
             else:
+                print("found in headers!")
                 pass
-                #print("found in headers!")
             #print(f"Looking for session: '{cookie}'")
             return cookie
         except Exception as e:
@@ -65,26 +64,26 @@ class FirestoreSessionInterface(SessionInterface):
             return None
 
     def open_session(self, app, request):
-        #print("...open_session...")
+        print("...open_session...")
         sid = self.request_session_id(request)
-        #print(f"session id '{sid}'")
+        print(f"session id '{sid}'")
         if sid is not None:
             session_data = self.get_session(sid)
             if session_data:
-                #print("Found session data!")
+                print("Found session data!")
                 print(dict(session_data))
                 return FirestoreSession(session_data, sid=sid)
             else:
-                #print("...no session data yet.")
+                print("...no session data yet.")
                 return FirestoreSession(sid=sid)
-        #print("Generating new session id")
+        print("Using dummy session")
         #sid = self.generate_sid()
         return FirestoreSession(sid=None)
 
     def save_session(self, app, session, response):
-        #print("...save_session...")
-        #print("...sid: ", session.sid)
-        #print(dict(session))
+        print("...save_session...")
+        print("...sid: ", session.sid)
+        print(dict(session))
         #print("sid:", session.sid)]
         if session.sid is None:
             print("... ignored save, no session id")
