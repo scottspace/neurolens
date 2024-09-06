@@ -49,7 +49,9 @@ class FirestoreSessionInterface(SessionInterface):
         try:
             #print("session request headers:", request.headers)
             #cookie = request.cookies.get('session') 
-            cookie = urllib.parse.unquote(request.headers.get('session'))
+            cookie = request.headers.get('session')
+            if cookie is not None:
+                cookie = urllib.parse.unquote(cookie)
             if cookie is None:
                 print("Looking for session in args")
                 cookie = request.args.get('s')  # auto unquoted
