@@ -740,6 +740,7 @@ def photo_from_thumb(path):
     return p1.replace("thumb_","")
 
 def image_urls(userid, thumb_blob_name):
+    filename = os.path.basename(thumb_blob_name)
     photo = photo_from_thumb(thumb_blob_name)
     tpath = thumb_path(userid,photo)
     base = "https://storage.googleapis.com/neuro-lens-bucket/"
