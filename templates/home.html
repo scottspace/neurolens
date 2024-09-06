@@ -330,7 +330,7 @@
                 $.ajax({
                     url: '/grid',          // The URL for the AJAX request
                     type: 'GET',            // Method of the request
-                    headers: {'session': get_session()},
+                    headers: {'session': get_session_id()},
                     success: function (data) {
                         // On success, replace the content of the #gallery div with the response data
                         $('#gallery').html(data);
