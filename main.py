@@ -743,7 +743,7 @@ def image_urls(userid, thumb_blob_name):
     filename = os.path.basename(thumb_blob_name)
     photo = photo_from_thumb(filename)
     tpath = thumb_path(userid,photo)
-    base = "https://storage.googleapis.com/neuro-lens-bucket/"
+    base = "https://storage.googleapis.com/neuro-lens-bucket"
     return [f"{base}/{tpath}",
             f"/kill/{tpath}", 
             f"{base}/{image_path(userid,photo)}"]
