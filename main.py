@@ -360,10 +360,11 @@ def zip_user(userzip):
         zip_user_photos(userid)
 
     # return zip file contents
-    blob = bucket.blob(zip_path(userid))
-    local_tmp = os.path.join('/tmp', os.path.basename(blob.name))
-    blob.download_to_filename(local_tmp)
-    return send_file(local_tmp, as_attachment=True), 200
+    return redirect(blob.public_url)
+
+    #local_tmp = os.path.join('/tmp', os.path.basename(blob.name))
+    #blob.download_to_filename(local_tmp)
+    #return send_file(local_tmp, as_attachment=True), 200
     
     #content_type, _ = mimetypes.guess_type(blob.name)
     #response = Response(generate_zip_stream(blob), content_type=content_type)
@@ -729,6 +730,14 @@ def photo_from_thumb(path):
     p1 = path.replace("thumbs","images")
     return p1.replace("thumb_","")
 
+def image_urls(userid, thumb_blob_name):
+    photo = photo_from_thumb(thumb_blob_name)
+    tpath = thumb_path(photo)
+    base = "https://storage.googleapis.com/neuro-lens-bucket/"
+    return [f"{base}/{tpath}",
+            f"/kill/{tpath}", 
+            f"{base}/{image_path(photo)}"]
+
 @app.route("/grid")
 @login_required
 def photo_grid():
@@ -743,7 +752,7 @@ def photo_grid():
     blobs_sorted = sorted(blobs, key=lambda blob: blob.updated, reverse=True)
 
     names = [blob.name for blob in blobs_sorted]
-    images = [[f"/photo/{name}", f"/kill/{name}", f"/photo/{photo_from_thumb(name)}"] for name in names]
+    images = [image_urls(name) for name in names]
     out= "<div class='grid grid-cols-2 md:grid-cols-3 gap-4'>"
     for imgkill in images:
         img = imgkill[0]
