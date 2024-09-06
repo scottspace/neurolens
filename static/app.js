@@ -31,11 +31,16 @@ function login(data) {
   })
     .then(response => response.json())
     .then(data => {
-      console.log('Success:', data);
-      // Redirect to the homepage or handle the user session
-      // store our session key for communicating with our server
-      save_session(data);
-      redirect("/home?s=" + data['sid'])
+      if (data['error']) {
+        console.error('Error:', data['error'])
+      }
+      else {
+        // Redirect to the homepage or handle the user session
+        // store our session key for communicating with our server
+        console.log("logging in...");
+        save_session(data);
+        redirect("/home?s=" + data['sid'])
+      }
     })
     .catch((error) => {
       console.error('Error:', error);
