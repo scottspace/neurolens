@@ -724,6 +724,8 @@ def photo_from_thumb(path):
 @app.route("/grid")
 @login_required
 def photo_grid():
+    print("***Grid")
+    print(request.headers)
     user_id = current_user.id
     bucket = storage_client.bucket(bucket_name)
     blobgen = storage_client.list_blobs(bucket_name, prefix=thumb_dir(user_id)+"/", delimiter='/')
