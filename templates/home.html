@@ -466,6 +466,7 @@
                         // On success, replace the content of the #gallery div with the response data
                         console.log(info);
                         window.location.href = info['url'];
+                        clear_session(); // important
                     },
                     error: function (xhr, status, error) {
                         // Handle errors here

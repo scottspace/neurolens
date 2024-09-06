@@ -23,7 +23,7 @@ class FirestoreSession(dict, SessionMixin):
         super().__init__(initial or {})
         self.sid = sid
         self.modified = False
-        print("created new session")
+        #print("created new session")
 
 class FirestoreSessionInterface(SessionInterface):
     def __init__(self, client=None, collection_name='sessions'):
@@ -38,10 +38,10 @@ class FirestoreSessionInterface(SessionInterface):
         doc = doc_ref.get()
         if doc.exists:
             data = doc.to_dict()
-            print("Got session")
+            #print("Got session")
             return pickle.loads(data['data'])
         if sid is None:
-            print("No session id")
+            #print("No session id")
             return None
         return {}  # empty session data
 
@@ -53,37 +53,38 @@ class FirestoreSessionInterface(SessionInterface):
             if cookie is not None:
                 cookie = urllib.parse.unquote(cookie)
             if cookie is None:
-                print("Looking for session in args")
+                #print("Looking for session in args")
                 cookie = request.args.get('s')  # auto unquoted
             else:
-                print("found in headers!")
-            print(f"Looking for session: '{cookie}'")
+                pass
+                #print("found in headers!")
+            #print(f"Looking for session: '{cookie}'")
             return cookie
         except Exception as e:
             print("Error getting session id:", e)
             return None
 
     def open_session(self, app, request):
-        print("...open_session...")
+        #print("...open_session...")
         sid = self.request_session_id(request)
-        print(f"session id '{sid}'")
+        #print(f"session id '{sid}'")
         if sid is not None:
             session_data = self.get_session(sid)
             if session_data:
-                print("Found session data!")
+                #print("Found session data!")
                 print(dict(session_data))
                 return FirestoreSession(session_data, sid=sid)
             else:
-                print("...no session data yet.")
+                #print("...no session data yet.")
                 return FirestoreSession(sid=sid)
-        print("Generating new session id")
+        #print("Generating new session id")
         #sid = self.generate_sid()
         return FirestoreSession(sid=None)
 
     def save_session(self, app, session, response):
-        print("...save_session...")
-        print("...sid: ", session.sid)
-        print(dict(session))
+        #print("...save_session...")
+        #print("...sid: ", session.sid)
+        #print(dict(session))
         #print("sid:", session.sid)]
         if session.sid is None:
             print("... ignored save, no session id")

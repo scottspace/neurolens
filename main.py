@@ -52,7 +52,7 @@ os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 
 # Initialize the GCS client
 storage_client = storage.Client()
-bucket_name = "neurolens"
+bucket_name = "neuro-lens-bucket" # "neurolens"
 
 # Flask app setup
 app = Flask(__name__)
@@ -163,6 +163,7 @@ def callback():
         # Return success message
         return jsonify({"message": "Login successful", 
                         "sid": sid,
+                        "id_token": id_token_str,
                         "user": {"email": email, "name": name}}), 200
 
     except ValueError as e:
@@ -247,6 +248,10 @@ def unauthorized():
 def user_code(user):
     return hashlib.md5(user.email.encode()).hexdigest()
 
+# important!  set up cors access to the bucket
+# 
+# gsutil cors set config/cors_config.json gs://neuro-lens-bucket
+#
 def zip_user_photos(userid):
     bucket = storage_client.bucket(bucket_name)
     zpath = zip_path(userid)
@@ -275,6 +280,7 @@ def zip_user_photos(userid):
     print(f"Storing zip file {zpath}")
     blob = bucket.blob(zpath)
     blob.upload_from_filename(local_zpath)
+    blob.make_public();
     # cleanup
     silent_remove(local_zpath)
 
@@ -386,11 +392,13 @@ def process_image_file(uid, bucket, file_path):
     # Upload the processed file to Google Cloud Storage
     blob = bucket.blob(image_path(uid, processed_file))
     blob.upload_from_filename(processed_path)
+    blob.make_public()
             
     print("Saving thumbnail to cloud")
     # Upload the thumbnail to Google Cloud Storage
     blob = bucket.blob(thumb_path(uid, processed_thumb))
     blob.upload_from_filename(local_thumb_path)
+    blob.make_public()
     
     #cleanup
     print("Cleaning up")
