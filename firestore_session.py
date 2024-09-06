@@ -66,12 +66,15 @@ class FirestoreSessionInterface(SessionInterface):
                 print("...no session data yet.")
                 return FirestoreSession(sid=sid)
         print("Generating new session id")
-        sid = self.generate_sid()
-        return FirestoreSession(sid=sid)
+        #sid = self.generate_sid()
+        return FirestoreSession(sid=None)
 
     def save_session(self, app, session, response):
         print("...save_session...")
-        #print("sid:", session.sid)
+        #print("sid:", session.sid)]
+        if session.sid is None:
+            print("... ignored save, no session id")
+            return
         doc_ref = self.client.collection(self.collection_name).document(session.sid)
         doc_ref.set({
             'data': pickle.dumps(dict(session)),

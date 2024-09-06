@@ -151,7 +151,7 @@ def callback():
         # STOPPED HERE - we need to create a new session object, as the current one has the
         # wrong session identifier.
         sid = encrypt_session_identifier(user_id)
-        session.id = sid  # update session with new identifier
+        session.sid = sid  # update session with new identifier so that it persists
         session['user_id'] = user_id
         session['email'] = email
         session['name'] = name
