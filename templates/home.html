@@ -63,56 +63,48 @@
                 </svg>
             </button>
 
-            <!-- Right-Aligned Eyeball Logo -->
-            <a href="#" class="flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-10 h-10 text-gray-800 dark:text-white">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-.253.74-.558 1.449-.908 2.122M2.458 12a16.098 16.098 0 00.908 2.122m-.908-2.122A16.094 16.094 0 012.458 12m0 0c1.274 4.057 5.065 7 9.542 7 4.478 0 8.268-2.943 9.542-7" />
-                </svg>
-            </a>
-
-            <!-- Hidden Links for Desktop -->
-            <div class="hidden w-full md:block md:w-auto" id="desktop-menu">
-                <ul class="flex flex-col md:flex-row md:space-x-8 text-gray-700 dark:text-white font-medium">
-                    <li>
-                        <a href="#"
-                            class="block py-2 px-3 rounded md:p-0 hover:text-blue-600 dark:hover:text-blue-400">Home</a>
-                    </li>
-                    <li>
-                        <a href="#"
-                            class="reset-menu block py-2 px-3 rounded md:p-0 hover:text-blue-600 dark:hover:text-blue-400">Reset</a>
-                    </li>
-                    <li>
-                        <a href="#"
-                            class="logout-menu block py-2 px-3 rounded md:p-0 hover:text-blue-600 dark:hover:text-blue-400">Logout</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Sliding Mobile Menu -->
-        <div id="mobile-menu"
-            class="fixed top-0 left-0 w-3/4 h-full bg-white shadow-lg z-50 transform -translate-x-full transition-transform duration-300 ease-in-out md:hidden dark:bg-gray-900">
-            <div class="p-4">
-                <button id="close-menu" class="text-gray-600 dark:text-gray-400">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <!-- Logo and Brand -->
+            <div class="flex items-center space-x-3">
+                <a href="#" class="flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-10 h-10 text-gray-800 dark:text-white">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-.253.74-.558 1.449-.908 2.122M2.458 12a16.098 16.098 0 00.908 2.122m-.908-2.122A16.094 16.094 0 012.458 12m0 0c1.274 4.057 5.065 7 9.542 7 4.478 0 8.268-2.943 9.542-7" />
                     </svg>
-                </button>
-                <ul class="mt-6 space-y-6">
-                    <li><a href="#"
-                            class="block text-gray-800 dark:text-white text-lg font-medium hover:text-blue-600 dark:hover:text-blue-400">Home</a>
-                    </li>
-                    <li><a href="#"
-                            class="reset-menu block text-gray-800 dark:text-white text-lg font-medium hover:text-blue-600 dark:hover:text-blue-400">Reset!</a>
-                    </li>
-                    <li><a href="#"
-                            class="logout-menu block text-gray-800 dark:text-white text-lg font-medium hover:text-blue-600 dark:hover:text-blue-400">Logout</a>
-                    </li>
-                </ul>
+                </a>
+                <span class="text-2xl font-bold text-gray-800 dark:text-white">NeuroLens</span>
+            </div>
+
+            <!-- Gear Icon for Configuration (Right Side) -->
+            <div class="flex items-center space-x-4">
+                <a href="#" id="gear-icon" class="flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-8 h-8 text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.591 1.095c1.532-.89 3.374.953 2.486 2.486a1.724 1.724 0 001.095 2.591c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.095 2.591c.89 1.532-.953 3.374-2.486 2.486a1.724 1.724 0 00-2.591 1.095c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.591-1.095c-1.532.89-3.374-.953-2.486-2.486a1.724 1.724 0 00-1.095-2.591c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.095-2.591c-.89-1.532.953-3.374 2.486-2.486a1.724 1.724 0 002.591-1.095z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </a>
+
+                <!-- Hidden Links for Desktop -->
+                <div class="hidden w-full md:block md:w-auto" id="desktop-menu">
+                    <ul class="flex flex-col md:flex-row md:space-x-8 text-gray-700 dark:text-white font-medium">
+                        <li>
+                            <a href="#"
+                                class="block py-2 px-3 rounded md:p-0 hover:text-blue-600 dark:hover:text-blue-400">Home</a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="reset-menu block py-2 px-3 rounded md:p-0 hover:text-blue-600 dark:hover:text-blue-400">Reset</a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="logout-menu block py-2 px-3 rounded md:p-0 hover:text-blue-600 dark:hover:text-blue-400">Logout</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
@@ -190,6 +182,55 @@
         <!-- Text Section -->
         <div>
             <span class="font-medium">Whoops!</span> There was an error training your AI. Please try again.
+        </div>
+    </div>
+
+
+    <!-- Modal/Popup for Configuration Panel -->
+    <div id="config-panel" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-800">Configure Your Profile</h2>
+                <button id="close-config" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="configForm" class="space-y-4">
+                <div class="flex flex-col">
+                    <label for="gender" class="text-gray-600 font-semibold">Gender</label>
+                    <input type="text" id="gender" name="gender"
+                        class="border border-gray-300 rounded-lg py-2 px-3 mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        placeholder="e.g., Male, Female, Non-binary">
+                </div>
+                <div class="flex flex-col">
+                    <label for="height" class="text-gray-600 font-semibold">Height (cm or inches)</label>
+                    <input type="text" id="height" name="height"
+                        class="border border-gray-300 rounded-lg py-2 px-3 mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        placeholder="e.g., 5'10'' or 178 cm">
+                </div>
+                <div class="flex flex-col">
+                    <label for="weight" class="text-gray-600 font-semibold">Weight (kg or lbs)</label>
+                    <input type="text" id="weight" name="weight"
+                        class="border border-gray-300 rounded-lg py-2 px-3 mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        placeholder="e.g., 165 lbs or 75 kg">
+                </div>
+                <div class="flex flex-col">
+                    <label for="build" class="text-gray-600 font-semibold">Build</label>
+                    <select id="build" name="build"
+                        class="border border-gray-300 rounded-lg py-2 px-3 mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="athletic">Athletic</option>
+                        <option value="average">Average</option>
+                        <option value="thin">Thin</option>
+                        <option value="heavy">Heavy</option>
+                    </select>
+                </div>
+                <button type="submit"
+                    class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">Save</button>
+            </form>
         </div>
     </div>
 
@@ -740,13 +781,90 @@
                 }
             });
 
+            function replacePlaceholdersWithProfile(promptTemplate) {
+                // Retrieve the stored profile from local storage
+                const userProfile = JSON.parse(localStorage.getItem('userProfile'));
+
+                // Check if the userProfile exists in local storage
+                if (userProfile) {
+                    // Replace placeholders with the corresponding values
+                    const updatedPrompt = promptTemplate
+                        .replace(/{height}/g, userProfile.height)
+                        .replace(/{weight}/g, userProfile.weight)
+                        .replace(/{gender}/g, userProfile.gender)
+                        .replace(/{build}/g, userProfile.build);
+
+                    return updatedPrompt;
+                } else {
+                    // If no profile data exists, return the original template
+                    return promptTemplate;
+                }
+            }
+
+
             // Handle Random Prompt Button click
             $('#random-prompt-btn').on('click', function () {
                 // Select a random prompt from the array
-                const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+                const randomTemplate = prompts[Math.floor(Math.random() * prompts.length)];
+                const randomPrompt = replacePlaceholdersWithProfile(randomTemplate);
 
                 // Insert the random prompt into the textarea
                 $('#prompt').val(randomPrompt);
+            });
+
+            $(document).ready(function () {
+                // Open the configuration panel when the gear icon is clicked
+                $('#gear-icon').on('click', function () {
+                    $('#config-panel').removeClass('hidden');
+                });
+
+                // Close the configuration panel
+                $('#close-config').on('click', function () {
+                    $('#config-panel').addClass('hidden');
+                });
+
+                // Close the panel if user clicks outside the modal content
+                $(window).on('click', function (event) {
+                    if (event.target.id === 'config-panel') {
+                        $('#config-panel').addClass('hidden');
+                    }
+                });
+
+                // Capture form submission and input data
+                $('#configForm').on('submit', function (event) {
+                    event.preventDefault();
+
+                    const gender = $('#gender').val();
+                    const height = $('#height').val();
+                    const weight = $('#weight').val();
+                    const build = $('#build').val();
+
+                    // Create a dictionary with the form values
+                    const userProfile = {
+                        gender: gender,
+                        height: height,
+                        weight: weight,
+                        build: build
+                    };
+
+                    // Store the dictionary in local storage
+                    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+
+                    // Optionally, log the values to verify
+                    console.log("User Profile Saved:", userProfile);
+
+                    // Close the panel after saving
+                    $('#config-panel').addClass('hidden');
+                });
+
+                // Preload the form with stored values if available
+                const storedProfile = JSON.parse(localStorage.getItem('userProfile'));
+                if (storedProfile) {
+                    $('#gender').val(storedProfile.gender);
+                    $('#height').val(storedProfile.height);
+                    $('#weight').val(storedProfile.weight);
+                    $('#build').val(storedProfile.build);
+                }
             });
 
             // load our gallery
