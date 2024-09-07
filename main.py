@@ -723,7 +723,7 @@ def kill_photo(img,kill,view):
         <img class="max-w-full rounded-lg" src="{}" alt="">
        </a>
        <div class="absolute top-0 right-0 w-4 h-4">
-         <a class="text-xl font-bold" href="{}">X</a>
+         <div class="kill text-xl font-bold" data-url="{}">X</div>
        </div>
     </div> 
     """

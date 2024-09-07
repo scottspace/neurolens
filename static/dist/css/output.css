@@ -1359,6 +1359,10 @@ input[type="range"]::-ms-fill-lower {
 
 @tailwind plugin;
 
+.kill {
+  cursor: pointer;
+}
+
 #filepond {
   width: 300px;
 }

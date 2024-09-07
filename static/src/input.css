@@ -3,6 +3,10 @@
 @tailwind utilities;
 @tailwind plugin;
 
+.kill {
+	cursor: pointer;
+}
+
 #filepond {
     width: 300px;
 }
