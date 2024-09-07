@@ -249,29 +249,24 @@
                     class="w-full px-0 text-sm text-gray-900 bg-white border-0 dark:bg-gray-800 focus:ring-0 dark:text-white dark:placeholder-gray-400"
                     placeholder="Describe an image using me:-) as your AI's name..." required></textarea>
             </div>
-            <div class="px-4 py-2 bg-white dark:bg-gray-800">
-                <div class="flex items-center space-x-2">
-                    <!-- Random Prompt Button -->
-                    <button id="random-prompt-btn"
-                        class="py-2.5 px-4 text-xs font-medium text-center text-white bg-blue-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-600">
-                        Random Prompt
-                    </button>
 
-                    <!-- Dropdown for predefined prompts -->
-                    <select id="prompt-select"
-                        class="text-sm p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900">
-                        <option value="">Select a prompt...</option>
-                    </select>
-                </div>
-            </div>
+            <!-- Button Section with separation and distinct styles -->
             <div class="flex items-center justify-between px-3 py-2 border-t dark:border-gray-600">
+                <!-- Random Prompt Button (left, informative) -->
+                <button id="random-prompt-btn"
+                    class="py-2.5 px-4 text-xs font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-700 dark:text-white dark:bg-gray-600 dark:hover:bg-gray-500">
+                    Random Prompt
+                </button>
+
+                <!-- Generate Button (right, CTA) -->
                 <button id="generate-button"
-                    class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-800">
+                    class="py-2.5 px-6 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800">
                     Generate
                 </button>
             </div>
         </div>
     </div>
+
 
     <!-- Gallery -->
     <div id="gallery"></div>
@@ -722,12 +717,13 @@
                 "An HD photo, photorealistic, super detailed, 35mm of me:-) who is standing on the deck of a luxury safari lodge in Africa at sunset, wearing a light khaki outfit, with vast savannah stretching out into the distance, a herd of elephants grazing in the background, and the golden light of the setting sun creating a serene atmosphere."
             ];
 
-            // Populate the dropdown with the prompt options using jQuery
-            $.each(prompts, function (index, prompt) {
-                $('#prompt-select').append($('<option>', {
-                    value: prompt,
-                    text: prompt
-                }));
+            // Handle Random Prompt Button click
+            $('#random-prompt-btn').on('click', function () {
+                // Select a random prompt from the array
+                const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+
+                // Insert the random prompt into the textarea
+                $('#prompt').val(randomPrompt);
             });
         });
 
