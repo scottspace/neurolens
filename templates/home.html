@@ -232,6 +232,21 @@
                     class="w-full px-0 text-sm text-gray-900 bg-white border-0 dark:bg-gray-800 focus:ring-0 dark:text-white dark:placeholder-gray-400"
                     placeholder="Describe an image using me:-) as your AI's name..." required></textarea>
             </div>
+            <div class="px-4 py-2 bg-white dark:bg-gray-800">
+                <div class="flex items-center space-x-2">
+                    <!-- Random Prompt Button -->
+                    <button id="random-prompt-btn"
+                        class="py-2.5 px-4 text-xs font-medium text-center text-white bg-blue-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-600">
+                        Random Prompt
+                    </button>
+
+                    <!-- Dropdown for predefined prompts -->
+                    <select id="prompt-select"
+                        class="text-sm p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900">
+                        <option value="">Select a prompt...</option>
+                    </select>
+                </div>
+            </div>
             <div class="flex items-center justify-between px-3 py-2 border-t dark:border-gray-600">
                 <button id="generate-button"
                     class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-800">
@@ -552,7 +567,7 @@
 
                 // hide mobile menu
                 $('#mobile-menu').addClass('-translate-x-full');
-                $('#desktop-menu').addClass('hidden'); 
+                $('#desktop-menu').addClass('hidden');
 
                 $.ajax({
                     url: '/logout',          // The URL for the AJAX request
@@ -575,7 +590,7 @@
             $('#reset').on('click', function () {
                 // hide mobile menu
                 $('#mobile-menu').addClass('-translate-x-full');
-                $('#desktop-menu').addClass('hidden'); 
+                $('#desktop-menu').addClass('hidden');
                 // Show the modal
                 $('#reset-modal').removeClass('hidden');
             });
@@ -674,7 +689,24 @@
 
             // check if we have enough images
             train_bar();
-        });
+
+            // prompts
+            // Array of predefined prompts
+            const prompts = [
+                "A futuristic city at sunset with flying cars.",
+                "A serene mountain landscape with a clear blue lake.",
+                "A cozy cabin in the woods during autumn.",
+                "An astronaut exploring an alien planet.",
+                "A digital art portrait of a person with glowing eyes."
+            ];
+
+            // Populate the dropdown with the prompt options using jQuery
+            $.each(prompts, function (index, prompt) {
+                $('#prompt-select').append($('<option>', {
+                    value: prompt,
+                    text: prompt
+                }));
+            });
     </script>
 
 </body>
