@@ -211,7 +211,7 @@ def root():
     # For the sake of example, use static information to inflate the template.
     # This will be replaced with real information in later steps.
     print("***Root")
-    print(request.headers)
+    #print(request.headers)
     sid = request.args.get('s')
     if sid is not None:
         return redirect(f"/home?s={sid}")
@@ -657,6 +657,7 @@ def reset():
     blobs = storage_client.list_blobs(bucket_name, prefix=thumb_dir(current_user.id)+"/", delimiter='/')
     for blob in blobs:
         blob.delete()
+    current_user.reset()
     return jsonify({'message': 'All images and thumbnails deleted'})
 
 def delete_blob(bucket_name, blob_name):
@@ -767,7 +768,7 @@ def image_urls(userid, thumb_blob_name):
 @login_required
 def photo_grid():
     print("***Grid")
-    print(request.headers)
+    #print(request.headers)
     user_id = current_user.id
     bucket = storage_client.bucket(bucket_name)
     blobgen = storage_client.list_blobs(bucket_name, prefix=thumb_dir(user_id)+"/", delimiter='/')

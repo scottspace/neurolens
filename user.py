@@ -23,6 +23,16 @@ class User(UserMixin):
         self.image_job_status = None
         self.image_job_log = None
         self.image_job_output = None
+        
+    def reset(self):
+        self.photo_url = ""
+        self.training_data = None
+        self.model = None
+        self.image_job = None
+        self.image_job_status = None
+        self.image_job_log = None
+        self.image_job_output = None
+        self.save()
             
     def save(self):
         # save the user to the database
