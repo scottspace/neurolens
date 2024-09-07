@@ -720,11 +720,9 @@ def generate_zip_stream(blob):
 def kill_photo(img,kill,view):
     base = """
     <div class="relative flex justify-center items-center">
-       <a href="{}" target="_blank">
-        <img class="max-w-full rounded-lg" src="{}" alt="">
-       </a>
+       <img class="gallery-image max-w-full rounded-lg" data-large="{}" alt="">
        <div class="absolute top-0 right-0 w-4 h-4">
-         <div class="kill text-xl font-bold" data-url="{}">X</div>
+         <div class="kill text-xl font-bold" data-url="{}">&times;</div>
        </div>
     </div> 
     """

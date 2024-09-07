@@ -7,6 +7,10 @@
 	cursor: pointer;
 }
 
+.gallery-image {
+	cursor: pointer;
+}
+
 #filepond {
     width: 300px;
 }
