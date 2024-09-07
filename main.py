@@ -695,9 +695,10 @@ def kill(path):
     source = '_'.join(parts[1:])
     try:
         delete_blob(bucket_name, image_path(current_user.id, source))
-    except:
+        return jsonify({'status': 'success', 'message': 'Image deleted'})
+    except Exception as oops:
         print("Source image not found")
-    return redirect("/home")
+        return jsonify({'status': 'error', 'message': f"Error deleting image: {oops}"})
     
 #
 ## Photo Grid

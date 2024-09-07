@@ -481,6 +481,7 @@
             // image kill switch
             $('.kill').on('click', function () {
                 var url = $(this).attr('data-url');
+                console.log("Clicked on "+url);
                 $.ajax({
                     url: url,          // The URL for the AJAX request
                     type: 'GET',            // Method of the request
