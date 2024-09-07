@@ -584,7 +584,7 @@ def get_train_info(training):
 def train():
     code = user_code(current_user)
     model = make_model(f"flux-dev-lora-{code}")
-    webhook = f"https://neurolens.scott.ai/train_complete/{current_user.id}"
+    webhook = f"https://neurolens.scott.ai/train_update/{current_user.id}"
     input_images = f"https://neurolens.scott.ai/zip/{current_user.id}.zip"
     print("webhook", webhook)
     print("input_images", input_images)
@@ -595,6 +595,7 @@ def train():
         destination=model,
         version="ostris/flux-dev-lora-trainer:7f53f82066bcdfb1c549245a624019c26ca6e3c8034235cd4826425b61e77bec",
         webhook=webhook,
+        webhook_event_filter=["start","output","logs","completed"],
         input={
             "steps": 1000,
             "lora_rank": 16,
@@ -610,21 +611,24 @@ def train():
     User.update_training(current_user.id,get_train_info(training))
     return jsonify({'message': 'Training started', 'id': training.id})
 
-@app.route('/train_complete/<userid>', methods=['POST'])
+@app.route('/train_update/<userid>', methods=['POST'])
 def train_complete(userid):
     j = request.get_json()
     feedback_id = j.get('id', None)
-    print(f"Training complete for job {feedback_id}!")
+    print(f"Training update for job {feedback_id}!")
     print(j)
     u = User.get(userid)
     try:
         training_id = u.training_data.get('id', None)
+        status = j['status']
         if training_id != feedback_id:
             print("Older training, ignoring.")
             return jsonify({'message': 'Training not active'})
-        else:
+        elif status in ['succeeded','success']:
             User.update_model(u.id, j)
             return jsonify({'message': 'Training complete'})
+        else:
+            print(f"training update {status}")
     except Exception as e:
         print(f"Error checking training, ignoring feedback.\n{e}")
         return jsonify({'message': 'Training not found'})
@@ -859,7 +863,8 @@ def genImage(user, prompt):
                "height": 1024,
                "num_outputs": 1,
                "image_job": user.image_job},
-        webhook=webhook)
+        webhook=webhook,
+        webhook_event_filter=["start","output","logs","completed"])
     user.image_job_status = prediction.status
     user.save()
     print("Started prediction", prediction)
