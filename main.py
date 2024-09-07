@@ -644,6 +644,8 @@ def reset():
     # erase zip
     clear()
     
+    # TODO delete dict elements in firestore
+    
     # Delete all images and thumbnails
     blobs = storage_client.list_blobs(bucket_name, prefix=image_dir(current_user.id)+"/", delimiter='/')
     for blob in blobs:
@@ -750,9 +752,10 @@ def image_urls(userid, thumb_blob_name):
     photo = photo_from_thumb(filename)
     tpath = thumb_path(userid,filename)
     base = "https://storage.googleapis.com/neuro-lens-bucket"
-    return [f"{base}/{image_path(userid,photo)}",
+    # we return the thumb image, the kill switch, the full view
+    return [f"{base}/{tpath}",
             f"/kill/{tpath}", 
-            f"{base}/{tpath}"]
+            f"{base}/{image_path(userid,photo)}"]
 
 # TODO have /grid pull from metadata, vs directory, then provide the image_id so that
 # we can delete the image appropriately
@@ -775,6 +778,7 @@ def photo_grid():
     out= "<div class='grid grid-cols-2 md:grid-cols-3 gap-4'>"
     for imgkill in images:
         img = imgkill[0]
+        # we get thumb image, kill link, full view
         out += kill_photo(imgkill[0],imgkill[1],imgkill[2])
     out += "</div>"
     return out
@@ -819,6 +823,7 @@ def create_image(user, prompt):
     info['prompt'] = prompt
     info['thumb_url'] = None
     info['image_url'] = None
+    info['filename'] = None
     doc_ref.set(info)  
     
 def update_image(user_id, image_id, url_dict): 
@@ -832,6 +837,7 @@ def update_image(user_id, image_id, url_dict):
     info['thumb_url'] = url_dict['thumb_url']
     info['image_url'] = url_dict['image_url']
     info['created'] = time.time()
+    info['filename'] = os.path.basename(url_dict['image_url'])
     doc_ref.set(info)  
     
 def genImage(user, prompt):
