@@ -268,10 +268,10 @@
 
             <!-- Button Section with separation and distinct styles -->
             <div class="flex items-center justify-between px-3 py-2 border-t dark:border-gray-600">
-                <!-- Random Prompt Button (left, informative) -->
+                <!-- Random Vision Button (left, informative) -->
                 <button id="random-prompt-btn"
                     class="py-2.5 px-4 text-xs font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-700 dark:text-white dark:bg-gray-600 dark:hover:bg-gray-500">
-                    Random Prompt
+                    Random Vision
                 </button>
 
                 <!-- Generate Button (right, CTA) -->
@@ -367,7 +367,7 @@
                 $('#desktop-menu').addClass('hidden');  // Ensure desktop menu is hidden when mobile is open
             });
 
-            function close_mobile_menu () {
+            function close_mobile_menu() {
                 $('#mobile-menu').addClass('-translate-x-full');
                 if ($(window).width() >= 768) {
                     $('#desktop-menu').removeClass('hidden');  // Show desktop menu back when mobile is closed on desktop
@@ -740,27 +740,6 @@
                 }
             });
 
-            // load our gallery
-            loadGallery();
-
-            // check if we have enough images
-            train_bar();
-
-            // prompts
-            // Array of predefined prompts
-            const prompts = [
-                "An HD photo, photorealistic, super detailed, 35mm of me:-) who is strolling along the cobblestone streets of a quaint European village in early summer, wearing a tailored linen shirt and dark jeans, golden sunlight casting long shadows, with a lively market in the background, locals chatting and street musicians playing.",
-                "An HD photo, photorealistic, super detailed, 35mm of me:-) who is lounging on a luxurious yacht deck in the Mediterranean, wearing a white button-up shirt and sunglasses, the sun setting over calm waters, with the coastline of a charming Italian town in the distance and a few friends laughing around.",
-                "An HD photo, photorealistic, super detailed, 35mm of me:-) who is sipping coffee at a chic Parisian café on a crisp autumn morning, wearing a stylish wool coat and scarf, the Eiffel Tower in the background, golden leaves scattered on the ground, and people walking by immersed in conversation.",
-                "An HD photo, photorealistic, super detailed, 35mm of me:-) who is hiking through a lush green rainforest in South America, wearing an athletic tank top and hiking pants, with misty mountains in the background and exotic birds flying above, sunlight filtering through the dense trees.",
-                "An HD photo, photorealistic, super detailed, 35mm of me:-) who is standing on a rooftop in New York City at night, wearing a sleek black blazer and turtleneck, the city skyline illuminated with skyscrapers and bright lights, with a cocktail in hand and a trendy crowd enjoying the evening around him.",
-                "An HD photo, photorealistic, super detailed, 35mm of me:-) who is strolling along a tropical beach at sunrise, wearing light swim trunks and a loose shirt, the ocean waves gently rolling onto the shore, with palm trees swaying in the background and a few joggers passing by.",
-                "An HD photo, photorealistic, super detailed, 35mm of me:-) who is relaxing by an infinity pool overlooking the ocean at a luxury resort, wearing sunglasses and a casual button-down shirt, the setting sun casting a golden glow on the scene, with a few people swimming in the background and tropical drinks on the side table.",
-                "An HD photo, photorealistic, super detailed, 35mm of me:-) who is attending a rooftop garden party in Tokyo at sunset, wearing a sharp navy blue suit, surrounded by modern cityscapes and neon lights, with guests mingling and enjoying sushi and cocktails, the Tokyo Tower in the distance.",
-                "An HD photo, photorealistic, super detailed, 35mm of me:-) who is skiing down a snowy mountain in the Swiss Alps on a clear winter morning, wearing a sleek ski jacket and goggles, the sun shining brightly on the pristine white slopes, with other skiers in the background carving down the mountain.",
-                "An HD photo, photorealistic, super detailed, 35mm of me:-) who is standing on the deck of a luxury safari lodge in Africa at sunset, wearing a light khaki outfit, with vast savannah stretching out into the distance, a herd of elephants grazing in the background, and the golden light of the setting sun creating a serene atmosphere."
-            ];
-
             // Handle Random Prompt Button click
             $('#random-prompt-btn').on('click', function () {
                 // Select a random prompt from the array
@@ -769,6 +748,13 @@
                 // Insert the random prompt into the textarea
                 $('#prompt').val(randomPrompt);
             });
+
+            // load our gallery
+            loadGallery();
+
+            // check if we have enough images
+            train_bar();
+
         });
 
     </script>
