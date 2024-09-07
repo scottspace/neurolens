@@ -361,16 +361,32 @@
                 $(id).removeClass('hidden').addClass('block');
             }
 
-            // Open the sliding mobile menu
-            $('[data-collapse-toggle]').on('click', function () {
+            // Handle Hamburger Menu Click
+            $('#hamburger-menu').on('click', function () {
                 $('#mobile-menu').removeClass('-translate-x-full');
-                $('#desktop-menu').addClass('hidden');  // Ensure the desktop menu is hidden
+                $('#desktop-menu').addClass('hidden');  // Ensure desktop menu is hidden when mobile is open
             });
 
-            // Close the sliding mobile menu
-            $('#close-menu').on('click', function () {
+            function close_mobile_menu () {
                 $('#mobile-menu').addClass('-translate-x-full');
-                $('#desktop-menu').removeClass('hidden');  // Show the desktop menu if screen size allows
+                if ($(window).width() >= 768) {
+                    $('#desktop-menu').removeClass('hidden');  // Show desktop menu back when mobile is closed on desktop
+                }
+            }
+
+            // Handle Mobile Menu Close Button
+            $('#close-menu').on('click', function () {
+                close_mobile_menu();
+            });
+
+            // Ensure that on window resize, the correct menu is shown based on screen size
+            $(window).on('resize', function () {
+                if ($(window).width() >= 768) {
+                    $('#desktop-menu').removeClass('hidden');  // Show desktop menu on large screens
+                    $('#mobile-menu').addClass('-translate-x-full');  // Hide mobile menu
+                } else {
+                    $('#desktop-menu').addClass('hidden');  // Hide desktop menu on small screens
+                }
             });
 
             function use_submit_state() {
@@ -608,8 +624,7 @@
             $('.logout-menu').on('click', function () {
 
                 // hide mobile menu
-                $('#mobile-menu').addClass('-translate-x-full');
-                $('#desktop-menu').addClass('hidden');
+                close_mobile_menu();
 
                 $.ajax({
                     url: '/logout',          // The URL for the AJAX request
@@ -631,8 +646,7 @@
             // Event listener for the reset menu item
             $('.reset-menu').on('click', function () {
                 // hide mobile menu
-                $('#mobile-menu').addClass('-translate-x-full');
-                $('#desktop-menu').addClass('hidden');
+                close_mobile_menu();
                 // Show the modal
                 $('#reset-modal').removeClass('hidden');
             });
