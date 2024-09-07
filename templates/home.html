@@ -632,7 +632,8 @@
                             // Hide the error message after 5 seconds (5000 milliseconds)
                             setTimeout(function () {
                                 hide_it('#generation-error');
-                                $('#generate-button').prop('disabled', false)
+                                $('#generate-button').prop('disabled', false);
+                                loadGallery()
                             }, 5000);
                         } else {
                             // Keep checking
@@ -650,6 +651,7 @@
                         setTimeout(function () {
                             hide_it('#generation-error');
                             $('#generate-button').prop('disabled', false)
+                            loadGallery();
                         }, 5000);
                     }
                 });
