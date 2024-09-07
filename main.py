@@ -717,16 +717,16 @@ def generate_image_stream(blob):
 def generate_zip_stream(blob):
     return generate_image_stream(blob)
 
-def kill_photo(img,kill,view):
+def kill_photo(index,img,kill,view):
     base = """
-    <div class="relative flex justify-center items-center">
+    <div id="gallery_image_{}" class="relative flex justify-center items-center">
        <img class="gallery-image max-w-full rounded-lg" src="{}" data-large="{}" alt="">
        <div class="absolute top-0 right-0 w-4 h-4">
-         <div class="kill text-xl font-bold" data-url="{}">&times;</div>
+         <div class="kill text-xl font-bold" data-image-id="gallery_image_{}" data-url="{}">&times;</div>
        </div>
     </div> 
     """
-    return base.format(img,view,kill)
+    return base.format(index,img,view,index,kill)
 
 @app.route("/photo/<path:path>")
 def photo(path):
@@ -778,11 +778,13 @@ def photo_grid():
 
     names = [blob.name for blob in blobs_sorted]
     images = [image_urls(user_id,name) for name in names]
-    out= "<div class='grid grid-cols-2 md:grid-cols-3 gap-4'>"
+    out= "<div id='gallery-images' class='grid grid-cols-2 md:grid-cols-3 gap-4'>"
+    index = 0
     for imgkill in images:
         img = imgkill[0]
+        index += 1
         # we get thumb image, kill link, full view
-        out += kill_photo(imgkill[0],imgkill[1],imgkill[2])
+        out += kill_photo(index,imgkill[0],imgkill[1],imgkill[2])
     out += "</div>"
     return out
 

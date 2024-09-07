@@ -407,6 +407,14 @@
                 startTrain();
             });
 
+            // 
+            function add_gallery_skeleton_image() {
+                var div = '<div class="relative flex justify-center items-center">';
+                div += '<div class="skeleton bg-gray-200 animate-pulse h-48 w-full rounded-lg"></div>';
+                div += '</div>'
+                $('#gallery-images').prepend(div);
+            }
+
             //
             function generate_image() {
                 $.ajax({
@@ -421,6 +429,7 @@
                         // Turn off the generate button while we wait
                         // and monitor the outcome.
                         $('#generate-button').prop('disabled', true)
+                        add_gallery_skeleton_image();
                         monitor_generation();
                         console.log("Success: ");
                         console.log(data);
@@ -500,16 +509,21 @@
             // image kill switch for dynamic content, bind to doc instead
             $(document).on('click', '.kill', function () {
                 var url = $(this).attr('data-url');
+                var image_id = '#' + $(this).attr('data-image-id');
                 console.log("Clicked on " + url);
+
                 $.ajax({
-                    url: url,          // The URL for the AJAX request
-                    type: 'GET',            // Method of the request
+                    url: url,
+                    type: 'GET',
                     headers: { 'session': get_session_id() },
                     success: function (info) {
-                        // On success, update the content of the #gallery div 
+                        // On success, fade out the image and then remove it from the DOM
                         console.log(info);
-                        loadGallery();
+                        $(image_id).fadeOut(500, function () {
+                            $(this).remove();
+                        });
                     },
+
                     error: function (xhr, status, error) {
                         // Handle errors here
                         console.log('Error deleting image.');
