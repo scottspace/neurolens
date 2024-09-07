@@ -542,6 +542,10 @@
 
             // logout button
             $('#logout').on('click', function () {
+                
+                // hide mobile menu
+                $('#mobile-menu').addClass('-translate-x-full');
+                
                 $.ajax({
                     url: '/logout',          // The URL for the AJAX request
                     type: 'GET',            // Method of the request
@@ -561,6 +565,8 @@
 
             // Event listener for the reset menu item
             $('#reset').on('click', function () {
+                // hide mobile menu
+                $('#mobile-menu').addClass('-translate-x-full');
                 // Show the modal
                 $('#reset-modal').removeClass('hidden');
             });
