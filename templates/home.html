@@ -74,9 +74,6 @@
                 <span class="self-center text-3xl font-bold text-gray-800 dark:text-white tracking-tight">
                     Neuro Lens
                 </span>
-                <span class="self-center text-xs font-normal text-gray-500 dark:text-gray-300 tracking-tight mt-1">
-                    by Scott Penberthy
-                </span>
             </a>
 
             <!-- Hidden Links for Desktop -->
@@ -87,12 +84,12 @@
                             class="block py-2 px-3 rounded md:p-0 hover:text-blue-600 dark:hover:text-blue-400">Home</a>
                     </li>
                     <li>
-                        <a href="#" id="reset"
-                            class="block py-2 px-3 rounded md:p-0 hover:text-blue-600 dark:hover:text-blue-400">Reset.</a>
+                        <a href="#"
+                            class="reset-menu block py-2 px-3 rounded md:p-0 hover:text-blue-600 dark:hover:text-blue-400">Reset.</a>
                     </li>
                     <li>
-                        <a href="#" id="logout"
-                            class="block py-2 px-3 rounded md:p-0 hover:text-blue-600 dark:hover:text-blue-400">Logout</a>
+                        <a href="#"
+                            class="logout-menu block py-2 px-3 rounded md:p-0 hover:text-blue-600 dark:hover:text-blue-400">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -113,10 +110,10 @@
                             class="block text-gray-800 dark:text-white text-lg font-medium hover:text-blue-600 dark:hover:text-blue-400">Home</a>
                     </li>
                     <li><a href="#"
-                            class="block text-gray-800 dark:text-white text-lg font-medium hover:text-blue-600 dark:hover:text-blue-400">Reset!</a>
+                            class="reset-menu block text-gray-800 dark:text-white text-lg font-medium hover:text-blue-600 dark:hover:text-blue-400">Reset!</a>
                     </li>
                     <li><a href="#"
-                            class="block text-gray-800 dark:text-white text-lg font-medium hover:text-blue-600 dark:hover:text-blue-400">Logout</a>
+                            class="logout-menu block text-gray-800 dark:text-white text-lg font-medium hover:text-blue-600 dark:hover:text-blue-400">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -212,7 +209,9 @@
         <div>
             <span class="font-medium">Whoops!</span> There was an error genrating your image. Please try again.
         </div>
-    </div <!-- Title -->
+    </div>
+
+    <!-- Title -->
     <header class="py-10">
         <h1 class="text-5xl font-bold text-amber-500">Neuro Lens</h1>
     </header>
@@ -229,6 +228,16 @@
     <!-- image generation prompt -->
     <div class="hidden" id="generation-form">
         <div class="w-full mb-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+            <!-- X Button to Clear the Input -->
+            <button id="clear-prompt-btn"
+                class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-10.707a1 1 0 00-1.414-1.414L10 8.586 7.707 6.293a1 1 0 00-1.414 1.414L8.586 10l-2.293 2.293a1 1 0 001.414 1.414L10 11.414l2.293 2.293a1 1 0 001.414-1.414L11.414 10l2.293-2.293z"
+                        clip-rule="evenodd" />
+                </svg>
+            </button>
+
             <div class="px-4 py-2 bg-white rounded-t-lg dark:bg-gray-800">
                 <label for="prompt" class="sr-only">Your prompt</label>
                 <textarea id="prompt" rows="4"
@@ -253,15 +262,14 @@
         </div>
     </div>
 
-
     <!-- Gallery -->
     <div id="gallery"></div>
 
     <!-- Hidden modal for larger image -->
-    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center hidden">
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center hidden p-4">
         <span id="closeModal" class="absolute top-4 right-4 text-white cursor-pointer text-3xl">&times;</span>
         <img id="modalImage"
-            class="rounded-lg max-w-full max-h-full transform scale-90 transition duration-500 ease-in-out">
+            class="rounded-lg transform scale-90 transition duration-500 ease-in-out max-w-full max-h-full md:max-w-3/4 md:max-h-3/4">
     </div>
 
     <!-- Modal reset (initially hidden) -->
@@ -360,7 +368,7 @@
 
             function use_generation_state() {
                 console.log("showing generation form");
-                $('#instruction').text("Describe an image using me:-) as your AI's name.");
+                $('#instruction').text("Describe a vision for me:-)");
                 hide_it('#informational-banner');
                 hide_it('#training-banner');
                 show_it('#generation-form');
@@ -489,6 +497,14 @@
             }
 
             //
+            // Image generation
+            //
+
+            // Clear the input (textarea) when the "X" button is clicked
+            $('#clear-prompt-btn').on('click', function () {
+                $('#prompt').val(''); // Clear the textarea
+            });
+
             function generate_image() {
                 $.ajax({
                     url: '/genImage',        // The URL for the AJAX request
@@ -533,6 +549,13 @@
                             hide_it('#generation-banner');
                             loadGallery();
                             train_bar();
+                        } else if (info['status'] == 'error') {
+                            show_it('#generation-error');
+                            // Hide the error message after 5 seconds (5000 milliseconds)
+                            setTimeout(function () {
+                                hide_it('#generation-error');
+                                $('#generate-button').prop('disabled', false)
+                            }, 5000);
                         } else {
                             // Keep checking
                             show_it('#generation-banner');
@@ -561,7 +584,7 @@
             });
 
             // logout button
-            $('#logout').on('click', function () {
+            $('.logout-menu').on('click', function () {
 
                 // hide mobile menu
                 $('#mobile-menu').addClass('-translate-x-full');
@@ -585,7 +608,7 @@
             });
 
             // Event listener for the reset menu item
-            $('#reset').on('click', function () {
+            $('.reset-menu').on('click', function () {
                 // hide mobile menu
                 $('#mobile-menu').addClass('-translate-x-full');
                 $('#desktop-menu').addClass('hidden');

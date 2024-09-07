@@ -977,6 +977,10 @@ input[type="range"]::-ms-fill-lower {
   top: 0px;
 }
 
+.right-2 {
+  right: 0.5rem;
+}
+
 .z-40 {
   z-index: 40;
 }
@@ -1738,6 +1742,11 @@ input[type="range"]::-ms-fill-lower {
 .hover\:text-blue-600:hover {
   --tw-text-opacity: 1;
   color: rgb(28 100 242 / var(--tw-text-opacity));
+}
+
+.hover\:text-gray-700:hover {
+  --tw-text-opacity: 1;
+  color: rgb(55 65 81 / var(--tw-text-opacity));
 }
 
 .focus\:outline-none:focus {

@@ -721,11 +721,13 @@ def generate_zip_stream(blob):
 def kill_photo(index,img,kill,view):
     base = """
     <div id="gallery_image_{}" class="relative flex justify-center items-center">
-       <img class="gallery-image max-w-full rounded-lg" src="{}" data-large="{}" alt="">
-       <div class="absolute top-0 right-0 w-4 h-4">
-         <div class="kill text-xl font-bold" data-image-id="gallery_image_{}" data-url="{}">&times;</div>
-       </div>
-    </div> 
+    <img class="gallery-image max-w-full rounded-lg" src="{}" data-large="{}" alt="">
+
+    <!-- Larger touch area for the "X" button (44x44 pixels) -->
+    <div class="absolute top-0 right-0 w-11 h-11 flex items-center justify-center">
+        <div class="kill text-xl font-bold cursor-pointer" data-image-id="gallery_image_{}" data-url="{}">&times;</div>
+    </div>
+    </div>
     """
     return base.format(index,img,view,index,kill)
 
@@ -907,6 +909,13 @@ def image_update(userid, job):
             return jsonify({'error': 'no json'})
         # TODO deal with multiple image jobs, multiple images
         user.image_job_status = info.get('status',None)
+        # check for erorr
+        err = info.get('error',None)
+        if err:
+            user.image_job_log = err
+            user.image_job_status = 'error'
+            user.save()
+            return jsonify({'error': err})
         imgs = get_images(info)
         if imgs:
             user.image_job_output = {'images': info.get('urls',None)}
