@@ -406,18 +406,16 @@ def GetPromptFromImage(file_path):
 
     try:
         # Extract the metadata from the PNG image
-        png_info = image.info.get("png")
-        if png_info is not None:
-            # Extract the custom metadata from the PNG info
-            metadata_json = png_info.get("custom_metadata")
-            if metadata_json is not None:
-                # Load the JSON metadata into a dictionary
-                metadata = json.loads(metadata_json)
-                print(f"Found custom metadata in {file_path}: {metadata}")
-                # Return the prompt from the metadata
-                return metadata.get("prompt")
+        metadata_info = image.info.get("custom_metadata")
+        if metadata_info is not None:
+            # Load the JSON metadata into a dictionary
+            metadata = json.loads(metadata_info)
+            print(f"Found custom metadata in {file_path}: {metadata}")
+            # Return the prompt from the metadata
+            return metadata.get("prompt","")
         else:
             print(f"No custom metadata found in {file_path}")
+            return ""
     except:
         return ""
     
