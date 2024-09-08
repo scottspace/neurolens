@@ -384,6 +384,7 @@ def silent_remove(filename):
  
 def AddPromptToImage(prompt, file_path):
     if prompt is None:
+        print(f"No prompt to save for {file_path}")
         return
     # store prompt string in the extensions of PNG file file_path
     image = Image.open(file_path)
@@ -397,6 +398,7 @@ def AddPromptToImage(prompt, file_path):
 
     # Save the image with the metadata
     image.save(file_path, pnginfo=png_info)
+    print(f"Prompt saved to {file_path}: {prompt}")
     
 def GetPromptFromImage(file_path):
     # Open the image file
@@ -411,8 +413,11 @@ def GetPromptFromImage(file_path):
             if metadata_json is not None:
                 # Load the JSON metadata into a dictionary
                 metadata = json.loads(metadata_json)
+                print(f"Found custom metadata in {file_path}: {metadata}")
                 # Return the prompt from the metadata
                 return metadata.get("prompt")
+        else:
+            print(f"No custom metadata found in {file_path}")
     except:
         return ""
     

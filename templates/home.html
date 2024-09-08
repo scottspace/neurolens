@@ -754,21 +754,30 @@
                 var image_id = '#' + $(this).attr('data-image-id');
                 console.log("Clicked on " + url);
 
+                // Start pulsing the image while waiting for the deletion
+                function pulseImage() {
+                    $(image_id).animate({ opacity: 0.5 }, 500)
+                        .animate({ opacity: 1 }, 500, pulseImage);  // Looping animation
+                }
+
+                pulseImage(); // Start the pulse
+
                 $.ajax({
                     url: url,
                     type: 'GET',
                     headers: { 'session': get_session_id() },
                     success: function (info) {
-                        // On success, fade out the image and then remove it from the DOM
+                        // On success, stop the pulsing and fade out the image
                         console.log(info);
+                        $(image_id).stop(true, true);  // Stop the pulsing animation
                         $(image_id).fadeOut(500, function () {
-                            $(this).remove();
+                            $(this).remove();  // Remove the image from the DOM
                         });
                     },
-
                     error: function (xhr, status, error) {
                         // Handle errors here
                         console.log('Error deleting image.');
+                        $(image_id).stop(true, true);  // Stop pulsing if there's an error
                     }
                 });
             });
@@ -945,6 +954,10 @@
                     url: '/read_prompt',
                     type: 'POST',
                     data: formData,
+                    headers: {
+                        // Add any necessary headers here
+                        'session': get_session_id()
+                    },
                     processData: false,
                     contentType: false,
                     xhr: function () {
