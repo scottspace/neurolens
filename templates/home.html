@@ -633,6 +633,7 @@
                     error: function (xhr, status, error) {
                         // Handle errors here
                         console.log("Error generating image.");
+                        hide_it('#generation-banner');
                         show_it('#generation-error');
                         // Hide the error message after 5 seconds (5000 milliseconds)
                         setTimeout(function () {
@@ -657,6 +658,7 @@
                             loadGallery();
                             train_bar();
                         } else if (info['status'] == 'error') {
+                            hide_it('#generation-banner');
                             show_it('#generation-error');
                             // Hide the error message after 5 seconds (5000 milliseconds)
                             setTimeout(function () {

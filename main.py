@@ -910,7 +910,9 @@ def create_image(user, prompt):
     doc_ref.set(info)  
     
 def delete_metadata(path):
-    doc_ref = db.collection('image_map').document(path[1:])
+    # docs can't have / in their name, so we replace them with _
+    path = path.replace("/", "_")
+    doc_ref = db.collection('image_map').document(path)
     doc = doc_ref.get()
     if doc.exists:
        info = doc.to_dict()
@@ -921,7 +923,8 @@ def delete_metadata(path):
        doc_ref.delete()
     
 def add_to_image_map(url, image_id):
-    path = urlparse(url).path[1:]
+    # docs can't have / in their name, so we replace them with _
+    path = urlparse(url).path.replace("/", "_")
     doc_ref = db.collection('image_map').document(path)
     doc = doc_ref.get()
     if doc.exists:
