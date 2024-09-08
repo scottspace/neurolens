@@ -3,6 +3,12 @@
 @tailwind utilities;
 @tailwind plugin;
 
+#progress-bar {
+    transition: width 0.3s ease-in-out; /* Smooth transition for width */
+    z-index: 5; /* Keep it behind the text content */
+    opacity: 0.7; /* Slight transparency for a subtle effect */
+}
+
 /* Ensure the configuration panel appears on top of other elements */
 #config-panel {
     z-index: 9999; /* A high z-index to stay above other elements */
