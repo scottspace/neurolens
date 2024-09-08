@@ -1046,7 +1046,7 @@ def copy_images_locally(user, image_job, urls):
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
         # TODO store prompt in the png image :-)
-        prompt = lookup_image_job_prompt(userid, image_job)
+        prompt = lookup_image_job_prompt(image_job)
         process_image_file(userid, bucket, local_path, prompt, image_job)
         
 def tz_now():
