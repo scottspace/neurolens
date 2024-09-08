@@ -910,7 +910,7 @@ def create_image(user, prompt):
     doc_ref.set(info)  
     
 def delete_metadata(path):
-    doc_ref = db.collection('image_map').document(path)
+    doc_ref = db.collection('image_map').document(path[1:])
     doc = doc_ref.get()
     if doc.exists:
        info = doc.to_dict()
@@ -921,14 +921,15 @@ def delete_metadata(path):
        doc_ref.delete()
     
 def add_to_image_map(url, image_id):
-    path = urlparse(url).path
+    path = urlparse(url).path[1:]
     doc_ref = db.collection('image_map').document(path)
     doc = doc_ref.get()
     if doc.exists:
        info = doc.to_dict()
+       info['image_id'] = image_id
     else:
-       info = {'image_id': image_id}
-    info[image_id] = True
+       info = {'image_id': image_id,
+               'id': path}
     doc_ref.set(info)
     
 def update_image(user_id, image_id, url_dict): 
