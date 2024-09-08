@@ -643,6 +643,144 @@ const prompts = [
   + "candles casts flickering shadows on the ancient façade, creating a "
   + "magical, almost mystical atmosphere in the quiet of the desert night.",
 
+ // sports
+
+    "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+    + "of {height} and {weight} with an {build} build, standing on the center "
+    + "court of the US Open, just after winning the championship. Me:-) is "
+    + "holding the trophy high, sweat glistening under the stadium lights, "
+    + "with a roaring crowd behind. The camera captures the ecstatic expression "
+    + "on their face, surrounded by confetti falling from the sky.",
+
+    "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+    + "of {height} and {weight} with an {build} build, captured mid-action on "
+    + "a soccer field, just as they kick the winning goal in a global soccer "
+    + "match. Me:-) is wearing a sleek soccer uniform, sweat flying off as the "
+    + "ball rockets toward the goal. The camera catches the intensity in their "
+    + "eyes, with a stadium full of fans erupting into cheers in the background.",
+
+    "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+    + "of {height} and {weight} with an {build} build, standing atop the "
+    + "winner’s podium at the Indy 500, wearing a racecar outfit and helmet "
+    + "in hand. Me:-) is surrounded by models, with the crowd cheering wildly "
+    + "and champagne spraying in celebration. The camera captures the "
+    + "triumphant smile on their face as they raise a fist in victory.",
+
+    "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+    + "of {height} and {weight} with an {build} build, being doused with "
+    + "Gatorade by teammates after winning the Super Bowl. Me:-) is wearing "
+    + "a football uniform, standing at the center of the field, arms raised "
+    + "in triumph, with a crowd of fans and fireworks lighting up the stadium "
+    + "behind them. The camera focuses on their face, capturing the pure joy "
+    + "and celebration.",
+
+    "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+    + "of {height} and {weight} with an {build} build, crossing the finish "
+    + "line at the Olympic Games, winning the men’s 100-meter dash. Me:-) is "
+    + "sprinting through the finish line, muscles tense with effort, their "
+    + "face beaming with exhilaration as the crowd rises to their feet in "
+    + "applause. The photo captures the exact moment of victory, with other "
+    + "athletes trailing behind.",
+
+    "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+    + "of {height} and {weight} with an {build} build, soaring through the air "
+    + "as they dunk a basketball during an NBA game. Me:-) is wearing a "
+    + "professional basketball jersey, captured mid-dunk with the crowd frozen "
+    + "in awe. The camera zooms in on their intense, focused expression as "
+    + "they make the winning shot, with a sea of cheering fans in the background.",
+
+    "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+    + "of {height} and {weight} with an {build} build, standing on the field "
+    + "as the quarterback for the Dallas Cowboys during a high-stakes NFL game. "
+    + "Me:-) is holding the football, looking determined as they prepare for a "
+    + "crucial play. The crowd is roaring, and the camera captures the intense "
+    + "focus on their face, with teammates rallying around in support.",
+
+    "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+    + "of {height} and {weight} with an {build} build, standing on the winner’s "
+    + "podium at the Tour de France, holding the famous yellow jersey. Me:-) is "
+    + "drenched in sweat, smiling triumphantly as the crowd applauds wildly. "
+    + "The Eiffel Tower is visible in the distance, with a flurry of camera "
+    + "flashes capturing this historic cycling victory.",
+
+    "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+    + "of {height} and {weight} with an {build} build, captured mid-swing as "
+    + "they hit the winning shot at the Masters Tournament. Me:-) is wearing a "
+    + "golf polo and cap, focused as the ball flies through the air. The camera "
+    + "zooms in on their face, showing a look of pure concentration and "
+    + "satisfaction, with the iconic Augusta National course stretching out "
+    + "behind them.",
+
+    "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+    + "of {height} and {weight} with an {build} build, skating gracefully on "
+    + "the ice after winning a gold medal in figure skating at the Winter "
+    + "Olympics. Me:-) is wearing a sleek skating outfit, holding the medal up "
+    + "proudly, with the crowd standing in ovation. The camera focuses on their "
+    + "face, capturing the emotion and joy of the moment, with the Olympic rings "
+    + "lit up behind them.",
+
+    // achievement
+
+      "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+      + "of {height} and {weight} with an {build} build, standing on the surface "
+      + "of the moon with their helmet visor open, revealing their face. Me:-) is "
+      + "gazing at Earth in the distance, surrounded by the vastness of space, as "
+      + "the camera captures the awe and accomplishment in their expression.",
+  
+      "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+      + "of {height} and {weight} with an {build} build, standing triumphantly at "
+      + "the summit of Mt. Kilimanjaro, arms raised high in victory. Me:-) is "
+      + "wearing hiking gear, with clouds swirling below and a sunrise casting "
+      + "a golden glow on the rugged mountain peak.",
+  
+      "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+      + "of {height} and {weight} with an {build} build, deep-sea diving in "
+      + "crystal-clear water. Me:-) is facing the underwater camera, surrounded "
+      + "by colorful coral reefs and schools of fish, their eyes wide with "
+      + "wonder, as they explore the depths of the ocean.",
+  
+      "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+      + "of {height} and {weight} with an {build} build, captaining a luxurious "
+      + "boat on Lake Como, Italy. Me:-) is steering the vessel, with a group of "
+      + "friends laughing and enjoying the ride. The camera captures the "
+      + "beautiful backdrop of the lake’s calm waters and scenic hills.",
+  
+      "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+      + "of {height} and {weight} with an {build} build, walking through the "
+      + "pyramids of Giza in Egypt, captured from a low angle with the Great "
+      + "Pyramid towering behind them. Me:-) is smiling, wearing casual travel "
+      + "clothes, marveling at the ancient wonder as the sun sets in the desert.",
+  
+      "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+      + "of {height} and {weight} with an {build} build, standing at the rim of "
+      + "the Grand Canyon, arms wide open, soaking in the breathtaking view. The "
+      + "camera captures the moment as the sunlight paints the canyon walls in "
+      + "red and orange hues, with the vast landscape spreading out behind them.",
+  
+      "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+      + "of {height} and {weight} with an {build} build, piloting a private jet "
+      + "over the Swiss Alps. Me:-) is in the cockpit, wearing aviator sunglasses "
+      + "and smiling confidently as the snowy peaks of the Alps stretch out "
+      + "below, with the vast blue sky above.",
+  
+      "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+      + "of {height} and {weight} with an {build} build, standing at the edge of "
+      + "Victoria Falls, with the roaring waterfall cascading behind them. Me:-) "
+      + "is wearing light outdoor gear, smiling in awe as the mist rises and "
+      + "rainbows form in the spray, capturing the raw power of nature.",
+  
+      "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+      + "of {height} and {weight} with an {build} build, riding a hot air balloon "
+      + "over the temples of Bagan, Myanmar. Me:-) is standing in the basket, "
+      + "captured at sunrise as hundreds of ancient temples dot the landscape "
+      + "below, with a golden light bathing the scene in serenity.",
+  
+      "An HD photo, photorealistic, super detailed, 35mm of me:-), a {gender} "
+      + "of {height} and {weight} with an {build} build, skiing down the slopes "
+      + "of Aspen, Colorado, at high speed. Me:-) is wearing professional ski gear, "
+      + "captured mid-turn with snow spraying around them, the clear blue sky "
+      + "and pine-covered mountains creating the perfect backdrop.",
+
   // first prompts i used
 
   "An HD photo, photorealistic, super detailed, 35mm of me:-) who is strolling along the cobblestone streets of a quaint European village in early summer, wearing a tailored linen shirt and dark jeans, golden sunlight casting long shadows, with a lively market in the background, locals chatting and street musicians playing.",

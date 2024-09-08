@@ -123,10 +123,10 @@
                         class="block text-gray-800 dark:text-white text-lg font-medium hover:text-blue-600 dark:hover:text-blue-400">Home</a>
                 </li>
                 <li><a href="#"
-                        class="block text-gray-800 dark:text-white text-lg font-medium hover:text-blue-600 dark:hover:text-blue-400">Reset</a>
+                        class="reset-menu block text-gray-800 dark:text-white text-lg font-medium hover:text-blue-600 dark:hover:text-blue-400">Reset</a>
                 </li>
                 <li><a href="#"
-                        class="block text-gray-800 dark:text-white text-lg font-medium hover:text-blue-600 dark:hover:text-blue-400">Logout</a>
+                        class="logout-menu block text-gray-800 dark:text-white text-lg font-medium hover:text-blue-600 dark:hover:text-blue-400">Logout</a>
                 </li>
             </ul>
         </div>
@@ -428,7 +428,9 @@
             // Handle Hamburger Menu Click
             $('#hamburger-menu').on('click', function () {
                 $('#mobile-menu').removeClass('-translate-x-full');
-                $('#desktop-menu').addClass('hidden');  // Ensure desktop menu is hidden when mobile is open
+                if ($(window).width() >= 768) {
+                    $('#desktop-menu').addClass('hidden');  // Hide desktop menu when mobile is open on desktop
+                }
             });
 
             function close_mobile_menu() {
@@ -889,6 +891,47 @@
                     $('#height').val(storedProfile.height);
                     $('#weight').val(storedProfile.weight);
                     $('#build').val(storedProfile.build);
+                }
+            });
+
+            // a little prompt magic
+ 
+        // Prevent default behavior for drag and drop
+        $('#generation-form').on('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).css('border-color', 'blue');
+        });
+
+        $('#generation-form').on('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).css('border-color', '#ccc');
+        });
+
+        // Handle file drop
+        $('#generation-form').on('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).css('border-color', '#ccc');
+
+            let file = e.originalEvent.dataTransfer.files[0]; // Get the dropped file
+            let formData = new FormData();
+            formData.append('file', file);
+
+            // Upload file to /read_prompt endpoint
+            $.ajax({
+                url: '/read_prompt',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    // Update the textarea with the returned prompt string
+                    $('#prompt').val(response.prompt);
+                },
+                error: function(err) {
+                    console.error('Error reading prompt:', err);
                 }
             });
 

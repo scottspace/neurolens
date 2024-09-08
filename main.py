@@ -7,7 +7,8 @@ from oauthlib.oauth2 import WebApplicationClient
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 from tzlocal import get_localzone
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps,PngImagePlugin
+import json
 from flask_login import (
     LoginManager,
     current_user,
@@ -380,11 +381,73 @@ def silent_remove(filename):
         os.remove(filename)
     except OSError:
         pass
+ 
+def AddPromptToImage(prompt, file_path):
+    if prompt is None:
+        return
+    # store prompt string in the extensions of PNG file file_path
+    image = Image.open(file_path)
+
+    # Convert the dictionary to a JSON string for storage
+    metadata_json = json.dumps({'prompt': prompt})
+
+    # Add the metadata using the PngInfo class
+    png_info = PngImagePlugin.PngInfo()
+    png_info.add_text("custom_metadata", metadata_json)
+
+    # Save the image with the metadata
+    image.save(file_path, pnginfo=png_info)
     
-def process_image_file(uid, bucket, file_path):
+def GetPromptFromImage(file_path):
+    # Open the image file
+    image = Image.open(file_path)
+
+    try:
+        # Extract the metadata from the PNG image
+        png_info = image.info.get("png")
+        if png_info is not None:
+            # Extract the custom metadata from the PNG info
+            metadata_json = png_info.get("custom_metadata")
+            if metadata_json is not None:
+                # Load the JSON metadata into a dictionary
+                metadata = json.loads(metadata_json)
+                # Return the prompt from the metadata
+                return metadata.get("prompt")
+    except:
+        return ""
+    
+# Ensure the /tmp/uploads directory exists
+UPLOAD_FOLDER = '/tmp/uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@app.route('/read_prompt', methods=['POST'])
+def handle_file_upload():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+
+    file = request.files['file']
+
+    # Ensure a filename is provided
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    # Save the file to /tmp/uploads
+    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+    try:
+        file.save(filepath)
+    except Exception as e:
+        return jsonify({'error': 'Could not save file', 'details': str(e)}), 500
+
+    # Call the read_prompt function to extract the prompt from the file
+    prompt_string = GetPromptFromImage(filepath)
+
+    # Return the prompt string in JSON format
+    return jsonify({'prompt': prompt_string})
+    
+def process_image_file(uid, bucket, file_path, prompt=None, job=None):
     # clean up an image stored locally at file_path and then
     # upload the 1024x1024 and thumb to cloud storage
-    image_id = str(uuid.uuid4())
+    image_id = str(uuid.uuid4()) if job is None else job
     processed_file = change_extension_to_png(os.path.basename(file_path))
     processed_thumb = "thumb_"+processed_file
     processed_path = os.path.join(PROCESSED_FOLDER, processed_file)
@@ -394,6 +457,10 @@ def process_image_file(uid, bucket, file_path):
     create_square_thumbnail(file_path, local_thumb_path)
     print(f"Removing {file_path}")
     silent_remove(file_path)
+    
+    # Save prompts
+    AddPromptToImage(prompt, processed_path)
+    AddPromptToImage(prompt, local_thumb_path)
         
     print("Saving image to cloud")
     # Upload the processed file to Google Cloud Storage
@@ -411,7 +478,7 @@ def process_image_file(uid, bucket, file_path):
     
     # store metadata in /images of firestore
     update_image(uid, image_id, {'image_url': image_url, 'thumb_url': thumb_url})
-    
+
     #cleanup
     print("Cleaning up")
     silent_remove(processed_path)
@@ -653,9 +720,11 @@ def reset():
     # Delete all images and thumbnails
     blobs = storage_client.list_blobs(bucket_name, prefix=image_dir(current_user.id)+"/", delimiter='/')
     for blob in blobs:
+        delete_metadata(blob.name)
         blob.delete()
     blobs = storage_client.list_blobs(bucket_name, prefix=thumb_dir(current_user.id)+"/", delimiter='/')
     for blob in blobs:
+        delete_metadata(blob.name)
         blob.delete()
     current_user.reset()
     return jsonify({'message': 'All images and thumbnails deleted'})
@@ -678,6 +747,7 @@ def delete_blob(bucket_name, blob_name):
     generation_match_precondition = blob.generation
 
     blob.delete(if_generation_match=generation_match_precondition)
+    delete_metadata(blob_name)
 
     print(f"Blob {blob_name} deleted.")
     
@@ -834,6 +904,28 @@ def create_image(user, prompt):
     info['filename'] = None
     doc_ref.set(info)  
     
+def delete_metadata(path):
+    doc_ref = db.collection('image_map').document(path)
+    doc = doc_ref.get()
+    if doc.exists:
+       info = doc.to_dict()
+       img_doc_ref = db.collection('images').document(info['image_id'])
+       img_doc = img_doc_ref.get()
+       if img_doc.exists:
+           img_doc_ref.delete()
+       doc_ref.delete()
+    
+def add_to_image_map(url, image_id):
+    path = urlparse(url).path
+    doc_ref = db.collection('image_map').document(path)
+    doc = doc_ref.get()
+    if doc.exists:
+       info = doc.to_dict()
+    else:
+       info = {'image_id': image_id}
+    info[image_id] = True
+    doc_ref.set(info)
+    
 def update_image(user_id, image_id, url_dict): 
     doc_ref = db.collection('images').document(image_id)
     doc = doc_ref.get()
@@ -847,6 +939,10 @@ def update_image(user_id, image_id, url_dict):
     info['created'] = time.time()
     info['filename'] = os.path.basename(url_dict['image_url'])
     doc_ref.set(info)  
+    # URLs are of the form
+    # https://storage.googleapis.com/neuro-lens-bucket/3507430c674561ac8f35c84815a8d8fd/images/IMG_8053.png
+    add_to_image_map(info['thumb_url'], image_id)
+    add_to_image_map(info['image_url'], image_id)
     
 def genImage(user, prompt):
     print("Resettting status")
@@ -927,7 +1023,15 @@ def image_update(userid, job):
         user.image_job_status = 'error'
         user.save()
         print("Image Hook Exception", e)
-        return jsonify({'error': str(e)}) #TODO make this string json clean  
+        return jsonify({'error': str(e)}) #TODO make this string json clean 
+    
+def lookup_image_job_prompt(image_job):
+    doc_ref = db.collection('images').document(image_job)
+    doc = doc_ref.get()
+    if doc.exists:
+       info = doc.to_dict()
+       return info.get('prompt',None)
+    return None 
 
 def copy_images_locally(user, image_job, urls):
     # handle errors TODO
@@ -942,7 +1046,8 @@ def copy_images_locally(user, image_job, urls):
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
         # TODO store prompt in the png image :-)
-        update_image(userid, image_job, process_image_file(userid, bucket, local_path))
+        prompt = lookup_image_job_prompt(userid, image_job)
+        process_image_file(userid, bucket, local_path, prompt, image_job)
         
 def tz_now():
    n = datetime.now(timezone.utc)
