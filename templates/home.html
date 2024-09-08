@@ -311,7 +311,7 @@
 
     <!-- image generation prompt -->
     <div class="hidden" id="generation-form">
-        <div
+        <div id="generation-container"
             class="relative w-full mb-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
             <!-- X Button to Clear the Input -->
             <button id="clear-prompt-btn"
@@ -324,7 +324,7 @@
             </button>
 
             <!-- Progress bar: for dropping files to get the prompt -->
-            <div id="progress-bar" class="absolute top-0 left-0 h-full bg-blue-500" style="width: 0%;"></div>
+            <div id="progress-bar" class="absolute rounded-t-lg rounded-b-lg top-0 left-0 h-full bg-blue-500" style="width: 0%;"></div>
 
             <div class="px-4 py-2 bg-white rounded-t-lg dark:bg-gray-800">
                 <label for="prompt" class="sr-only">Your prompt</label>
@@ -907,7 +907,7 @@
                 e.stopPropagation();
 
                 // Remove any previous border and background colors, and add Tailwind classes for highlight
-                $(this).removeClass(grayBorder)
+                $('#generation-container').removeClass(grayBorder)
                     .addClass(blueBorder);
             });
 
@@ -916,7 +916,7 @@
                 e.stopPropagation();
 
                 // Restore the original Tailwind border and background classes
-                $(this).removeClass(blueBorder)
+                $('#generation-container').removeClass(blueBorder)
                     .addClass(grayBorder);
             });
 
@@ -926,7 +926,7 @@
                 e.stopPropagation();
 
                 // Remove highlight and reset to original styling
-                $(this).removeClass(blueBorder)
+                $('#generation-container').removeClass(blueBorder)
                     .addClass(grayBorder);
 
                 let file = e.originalEvent.dataTransfer.files[0]; // Get the dropped file
@@ -937,7 +937,7 @@
                 $('#progress-bar').css('width', '0%');
 
                 // Add highlighting for active upload
-                $('#generation-form').removeClass(grayBorder).addClass(greenBorder);
+                $('#generation-container').removeClass(grayBorder).addClass(greenBorder);
 
                 // Upload file to /read_prompt endpoint with progress tracking
                 $.ajax({
@@ -968,7 +968,7 @@
                         $('#progress-bar').css('width', '100%');
                         setTimeout(function () {
                             $('#progress-bar').css('width', '0%'); // Reset progress bar for future uploads
-                            $('#generation-form').removeClass(greenBorder)
+                            $('#generation-container).removeClass(greenBorder)
                                 .addClass(grayBorder);
                         }, 1000);
                     },
@@ -976,12 +976,12 @@
                         console.error('Error reading prompt:', err);
 
                         // Reset border and background after error
-                        $('#generation-form').removeClass(greenBorder)
+                        $('#generation-container').removeClass(greenBorder)
                             .addClass(redBorder);
 
                         // revert to the default border after some time
                         setTimeout(function () {
-                            $('#generation-form').removeClass(redBorder)
+                            $('#generation-container').removeClass(redBorder)
                                 .addClass(grayBorder);
                         }, 3000);  // Revert to default styling after 3 seconds
                     }
