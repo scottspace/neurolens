@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from urllib.parse import urlparse
 from tzlocal import get_localzone
 from PIL import Image, ImageOps,PngImagePlugin
+from pillow_heif import register_heif_opener
 import json
 from flask_login import (
     LoginManager,
@@ -16,6 +17,8 @@ from flask_login import (
     login_user,
     logout_user,
 ) 
+
+register_heif_opener() # add HEIF support
 
 import datetime
 import os

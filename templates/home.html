@@ -29,6 +29,8 @@
     <!-- FilePond CSS -->
     <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
     <!-- FilePond Plugins -->
+    <script src="https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
+    <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
     <script
         src="https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
     <script
@@ -387,7 +389,9 @@
             FilePondPluginFileValidateSize,
             // corrects mobile image orientation
             FilePondPluginImageExifOrientation,
-            FilePondPluginFilePoster
+            FilePondPluginFilePoster,
+            // sets max file size
+            FilePondPluginFileValidateSize
         );
 
         // override default options
@@ -409,6 +413,7 @@
             const pond = FilePond.create(inputElement, {
                 allowMultiple: true,
                 maxFiles: 25,
+                maxFileSize: "20MB",
                 credits: false,
                 server: {
                     url: 'https://neurolens.scott.ai',
