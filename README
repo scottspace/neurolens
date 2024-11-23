@@ -1,0 +1,37 @@
+Source code for AI avatar "neurolens" experiment
+
+  - Replicate.com hosted on GCP
+  - APIs for training Flux LoRA layers
+  - APIs for driving Flux 1.1 + LoRA image generation
+  - Private GCS for storing images
+  - Orchestration via Flask
+  - Flask, TailWind, jQuery on App Engine with https load balancer
+  - OAuth 2.0 using custom browser storage and custom Firestore session state
+
+We first thought it would be a good idea to just have people
+sign up with a google cloud account, then upload their images
+to a GCS bucket.  Interestingly, this proved far too difficult
+for business customers and friends, as a new account requires
+a new IAM configuration, service account configuration, OAuth
+configuration, and session state (Chrome wasn't supporting cookies
+by default in many instances).
+
+What we thought would be a quick hookup to Replicate, as you can hear
+on the Lex Fridman podcast with @levelsio, turned out to to be a multi-week
+struggle with OAuth on AppEngine, getting session state correct, so that
+sessions could be shared across multiple, running container instances of
+AppEngine.
+
+We ended up storing MD5 summmarized session state flags in browser
+storage, which would then refer to a state vector in a Firestore
+JSON database that was accessed by each AppEngine node.  We then
+had to adjust appengine and the Flask as the standard libraries
+were not working and assumed a single server instance.  Further,
+we then had to modify OAuth that also assumed the same server was
+used during a basic authentication interaction, which wanted to
+use cookies, which Chrome had disabled.
+
+That was the long pole in the tent, about ten days or so.  Once
+that was running, the engine came together quickly.  Gemini was
+super useful with Tailwind, that has a litany of obscure tags
+that while useful, present a steep learning curve.
