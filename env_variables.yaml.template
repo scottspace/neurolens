@@ -1,0 +1,8 @@
+env_variables:
+  FLASK_APP: main.py
+  GOOGLE_APPLICATION_CREDENTIALS: "config/service.json"
+  REPLICATE_API_TOKEN: "a string from replicate.com"
+  ENCRYPTION_KEY: "a generated key"
+  GOOGLE_CLIENT_ID: "a string from Oauth for your service account"
+  GOOGLE_CLIENT_SECRET: "a string from Oauth for your service account"
+  REPLICATE_USER: "username on replicate.com"
