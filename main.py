@@ -54,7 +54,6 @@ GOOGLE_DISCOVERY_URL = (
 UPLOAD_FOLDER = '/tmp/uploads/'
 PROCESSED_FOLDER = '/tmp/processed/'
 ZIP_FOLDER = '/tmp/zipped/'
-REPLICATE_USER = "scottspace"
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(ZIP_FOLDER, exist_ok=True)
@@ -62,7 +61,7 @@ os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 
 # Initialize the GCS client
 storage_client = storage.Client()
-bucket_name = "neuro-lens-bucket" # "neurolens"
+bucket_name = os.getenv("BUCKET_NAME")
 
 # Flask app setup
 app = Flask(__name__)
@@ -371,14 +370,6 @@ def zip_user(userzip):
 
     # return zip file contents
     return redirect(blob.public_url)
-
-    #local_tmp = os.path.join('/tmp', os.path.basename(blob.name))
-    #blob.download_to_filename(local_tmp)
-    #return send_file(local_tmp, as_attachment=True), 200
-    
-    #content_type, _ = mimetypes.guess_type(blob.name)
-    #response = Response(generate_zip_stream(blob), content_type=content_type)
-    #response.headers['Content-Type'] = content_type
 
 def silent_remove(filename):
     try:
