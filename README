@@ -8,6 +8,11 @@ Source code for AI avatar "neurolens" experiment
   - Flask, TailWind, jQuery on App Engine with https load balancer
   - OAuth 2.0 using custom browser storage and custom Firestore session state
 
+This requires env_variables.yaml with keys, and config/service.json
+as the service account key file from a google cloud service
+account. See env_variables.yaml.template and config/service.json.template
+for an example.
+
 We first thought it would be a good idea to just have people
 sign up with a google cloud account, then upload their images
 to a GCS bucket.  Interestingly, this proved far too difficult
