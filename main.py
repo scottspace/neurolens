@@ -132,7 +132,7 @@ def auth_google():
     # Redirect to Google OAuth 2.0 for login
     return redirect(request_uri)
 
-#proposed by chatgpt
+#proposed by chatgpt - didn't work
 @app.route("/auth/google/callback", methods=["POST"])
 def callback():
     print("auth callback")
