@@ -45,8 +45,9 @@ import time
 from user import User
 
 # Ensure you set your client ID here
-CLIENT_ID = '496812288990-o702g9h779lv2l3d2dae25rj7rcr3978.apps.googleusercontent.com'
-CLIENT_SECRET = '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'
+CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+REPLICATE_USER = os.getenv('REPLICATE_USER')
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 )
